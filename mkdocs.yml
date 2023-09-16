@@ -1,0 +1,16 @@
+site_name: apilizer - Analisador de API
+repo_url: https://github.com/Tchez/apilizer
+repo_name: tchez/apilizer
+edit_uri: tree/main/docs
+
+theme:
+  name: material
+  language: pt-BR
+  logo: assets/temp_logo.png
+  favicon: assets/temp_logo.png
+
+markdown_extensions:
+  - attr_list
+
+extra_css:
+  - stylesheets/extra.css
