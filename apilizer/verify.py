@@ -17,7 +17,7 @@ async def check_swagger(uri: str) -> dict:
     Examples:
         >>> import asyncio
         >>> asyncio.run(check_swagger('http://127.0.0.1:8000')) # doctest: +SKIP
-        {'status': 'success', 'message': 'Swagger/OpenAPI documentation found at /openapi.json.'}
+        {'status': 'success', 'message': 'Swagger/OpenAPI documentation found at http://127.0.0.1:8000/openapi.json.'}
 
         >>> import asyncio
         >>> asyncio.run(check_swagger('http://127.0.0.1:8000')) # doctest: +SKIP
@@ -31,7 +31,7 @@ async def check_swagger(uri: str) -> dict:
                 if response.status_code == 200:
                     return {
                         'status': 'success',
-                        'message': f'Swagger/OpenAPI documentation found at /{endpoint}.',
+                        'message': f'Swagger/OpenAPI documentation found at {uri}/{endpoint}.',
                     }
                 else:
                     errors.append(

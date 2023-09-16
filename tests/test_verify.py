@@ -15,7 +15,7 @@ def test_check_swagger_with_openapi_endpoint():
     result = asyncio.run(check_swagger('http://127.0.0.1:8000'))
     assert result == {
         'status': 'success',
-        'message': 'Swagger/OpenAPI documentation found at /openapi.json.',
+        'message': 'Swagger/OpenAPI documentation found at http://127.0.0.1:8000/openapi.json.',
     }
 
 
@@ -31,7 +31,7 @@ def test_check_swagger_with_swagger_endpoint():
     result = asyncio.run(check_swagger('http://127.0.0.1:8000'))
     assert result == {
         'status': 'success',
-        'message': 'Swagger/OpenAPI documentation found at /swagger.json.',
+        'message': 'Swagger/OpenAPI documentation found at http://127.0.0.1:8000/swagger.json.',
     }
 
 
