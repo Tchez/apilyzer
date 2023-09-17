@@ -1,5 +1,7 @@
 <h1 align="center"> APIlizer </h1>
-<p align="center"><img width=300px src="./docs/assets/temp_logo.png"></p>
+<p align="center"><img width=300px src="https://github.com/Tchez/apilizer/blob/main/docs/assets/temp_logo.png"></p>
+
+
 
 [![Documentation Status](https://readthedocs.org/projects/apilizer/badge/?version=latest)](https://apilizer.readthedocs.io/en/latest/?badge=latest)
 [![CI](https://github.com/tchez/apilizer/actions/workflows/pipeline.yaml/badge.svg)](https://github.com/tchez/apilizer/actions/workflows/pipeline.yaml)
