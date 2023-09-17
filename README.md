@@ -44,13 +44,13 @@ pip install apilizer
 A biblioteca oferece uma CLI para que você possa analizar APIs REST via linha de comando. Para isso, basta executar o comando abaixo:
 
 ```bash
-apilizer analyze <url>
+apilizer <url>
 ```
 
 Onde `<url>` é a url da API que você deseja analizar, que caso não seja informada, será utilizada a url `http://localhost:8000`. Por exemplo:
 
 ```bash
-apilizer analyze https://myapi.com
+apilizer https://myapi.com
 ```
 
 O comando acima irá analizar a URL `https://myapi.com` e gerar um relatório com o nível de maturidade da mesma, além de recomendações de melhorias para que a API atinja o nível de maturidade desejado.
@@ -66,6 +66,7 @@ apilizer --help
 ```
 
 Para mais informações sobre os subcomandos do CLI, basta executar o comando abaixo:
+> no momento não há subcomandos
 
 ```bash
 apilizer <subcomando> --help

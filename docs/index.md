@@ -7,7 +7,7 @@
 Você pode analisar sua API via linha de comando. Para isso, basta executar o seguinte comando:
 
 ```bash
-poetry run verify
+apilizer
 ```
 
 Retorno esperado:
@@ -22,7 +22,7 @@ Retorno esperado:
 Caso queira analisar uma API que não esteja rodando em `localhost`, basta passar a URL como parâmetro:
 
 ```bash
-poetry run verify <url>
+apilizer <url>
 ```
 
 Retorno esperado:
@@ -39,5 +39,5 @@ Retorno esperado:
 Para mais informações sobre o CLI, basta usar a flag `--help`:
 
 ```bash
-poetry run verify --help
+apilizer --help
 ```

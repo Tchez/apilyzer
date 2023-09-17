@@ -21,7 +21,7 @@ classifiers = [
 
 
 [tool.poetry.scripts]
-verify = "apilizer.cli:app"
+apilizer = "apilizer.cli:app"
 
 
 [tool.poetry.dependencies]
