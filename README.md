@@ -1,20 +1,15 @@
 <h1 align="center"> APIlizer </h1>
-<div style="margin-left: 100px; margin-right: 100px;">
 
-![Logo temporária](docs/assets/temp_logo.png)
+> English documentation version in progress...
 
-</div>
+![Logo temporária](./docs/assets/temp_logo.jpg)
 
-<div style="text-align:center; margin-top:10px;">
 
 [![Documentation Status](https://readthedocs.org/projects/apilizer/badge/?version=latest)](https://apilizer.readthedocs.io/en/latest/?badge=latest)
 [![CI](https://github.com/tchez/apilizer/actions/workflows/pipeline.yaml/badge.svg)](https://github.com/tchez/apilizer/actions/workflows/pipeline.yaml)
 [![codecov](https://codecov.io/gh/tchez/apilizer/branch/main/graph/badge.svg?token=OVQQF4IQY2)](https://codecov.io/gh/tchez/apilizer)
 [![PyPI version](https://badge.fury.io/py/apilizer.svg)](https://badge.fury.io/py/apilizer)
 
-</div>
-
-> English documentation version in progress...
 ## Tabela de conteúdos:
 
 - [Descrição e contexto](#descrição-e-contexto)
