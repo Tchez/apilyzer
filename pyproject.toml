@@ -4,6 +4,20 @@ version = "0.1.0"
 description = ""
 authors = ["Marco Antônio <marcomartins06@rede.ulbra.br>"]
 readme = "README.md"
+packages = [{ include = "apilizer" }]
+classifiers = [
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Environment :: Console",
+    "Development Status :: 2 - Pre-Alpha",
+    "Programming Language :: Python :: 3.11",
+    "Intended Audience :: Developers",
+]
+
+[tool.poetry.urls]
+"Documentation" = "https://apilizer.readthedocs.io/en/latest/"
+"Source Code" = "https://github.com/Tchez/apilizer"
+"Bug Tracker" = "https://github.com/Tchez/apilizer/issues"
+
 
 [tool.poetry.scripts]
 verify = "apilizer.cli:app"
