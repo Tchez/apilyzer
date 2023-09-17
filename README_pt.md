@@ -6,7 +6,6 @@
 [![codecov](https://codecov.io/gh/tchez/apilizer/branch/main/graph/badge.svg?token=OVQQF4IQY2)](https://codecov.io/gh/tchez/apilizer)
 [![PyPI version](https://badge.fury.io/py/apilizer.svg)](https://badge.fury.io/py/apilizer)
 
-> English documentation version in progress...
 ## Tabela de conteúdos:
 
 - [Descrição e contexto](#descrição-e-contexto)
