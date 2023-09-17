@@ -1,3 +1,5 @@
+import json
+
 import httpx
 
 
@@ -9,7 +11,7 @@ async def check_swagger(uri: str) -> dict:
         uri (str): The base URI of the API.
 
     Returns:
-        A dictionary containing the 'status' key with values 'success' or 'failure', and a 'message' key with detailed information on the status or errors encountered.
+        A dictionary containing the 'status' key with values 'success' or 'failure', a 'message' key with detailed information on the status or errors encountered during the check, and a 'paths' key with the paths found in the Swagger/OpenAPI documentation.
 
     Raises:
         httpx.RequestError: If there was an error making the request (note: this is handled within the function and reported in the return dict).
@@ -17,11 +19,11 @@ async def check_swagger(uri: str) -> dict:
     Examples:
         >>> import asyncio
         >>> asyncio.run(check_swagger('http://127.0.0.1:8000')) # doctest: +SKIP
-        {'status': 'success', 'message': 'Swagger/OpenAPI documentation found at http://127.0.0.1:8000/openapi.json.'}
+        {'status': 'success', 'message': 'Swagger/OpenAPI documentation found at http://127.0.0.1:8000/openapi.json.', 'paths': { ... }}
 
         >>> import asyncio
         >>> asyncio.run(check_swagger('http://127.0.0.1:8000')) # doctest: +SKIP
-        {'status': 'failure', 'message': 'Could not find Swagger/OpenAPI documentation.'}
+        {'status': 'failure', 'message': 'Could not find Swagger/OpenAPI documentation.', 'paths': {}}
     """
     async with httpx.AsyncClient() as client:
         errors = []
@@ -29,9 +31,17 @@ async def check_swagger(uri: str) -> dict:
             try:
                 response = await client.get(f'{uri}/{endpoint}')
                 if response.status_code == 200:
+                    try:
+                        paths = response.json()['paths']
+                    except:
+                        errors.append(
+                            f'No paths found in Swagger/OpenAPI documentation at {uri}/{endpoint}.'
+                        )
+                        paths = {}
                     return {
                         'status': 'success',
                         'message': f'Swagger/OpenAPI documentation found at {uri}/{endpoint}.',
+                        'paths': paths,
                     }
                 else:
                     errors.append(
@@ -44,4 +54,5 @@ async def check_swagger(uri: str) -> dict:
         return {
             'status': 'failure',
             'message': f'Could not find Swagger/OpenAPI documentation. Errors encountered: {errors}',
+            'paths': {},
         }

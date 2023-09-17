@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "apilizer"
-version = "0.1.2"
+version = "0.1.3"
 description = "APIlizer is a python library that aims to analyze the level of maturity of REST APIs, following the Richardson maturity model"
 license = "MIT"
 authors = ["Marco Antônio <marcomartins06@rede.ulbra.br>"]

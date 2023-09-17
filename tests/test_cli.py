@@ -7,6 +7,7 @@ runner = CliRunner()
 
 def test_cli_returns_success():
     result = runner.invoke(app)
+    print(result.output)
     assert result.exit_code == 0
 
 
@@ -15,3 +16,4 @@ def test_verify_swagger_command_returns_status_and_message():
 
     assert 'status' in result.stdout
     assert 'message' in result.stdout
+    assert 'paths' in result.stdout

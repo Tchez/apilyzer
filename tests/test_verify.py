@@ -16,6 +16,7 @@ def test_check_swagger_with_openapi_endpoint():
     assert result == {
         'status': 'success',
         'message': 'Swagger/OpenAPI documentation found at http://127.0.0.1:8000/openapi.json.',
+        'paths': {},
     }
 
 
@@ -32,6 +33,7 @@ def test_check_swagger_with_swagger_endpoint():
     assert result == {
         'status': 'success',
         'message': 'Swagger/OpenAPI documentation found at http://127.0.0.1:8000/swagger.json.',
+        'paths': {},
     }
 
 
@@ -48,6 +50,7 @@ def test_check_swagger_with_api_and_no_documentation():
     assert result == {
         'status': 'failure',
         'message': "Could not find Swagger/OpenAPI documentation. Errors encountered: ['404 Client Error: Not Found for url: http://127.0.0.1:8000/openapi.json', '404 Client Error: Not Found for url: http://127.0.0.1:8000/swagger.json']",
+        'paths': {},
     }
 
 
