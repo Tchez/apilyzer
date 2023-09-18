@@ -1,19 +1,61 @@
 import asyncio
 
 from rich.console import Console
-from typer import Argument, Typer
+from typer import Argument, Context, Typer
 
-from apilizer.verify import check_swagger
+from apilizer.verify import check_swagger_rest, is_rest_api
 
 console = Console()
 app = Typer()
 
 
+@app.callback(invoke_without_command=True)
+def main(
+    ctx: Context,
+):
+    message = """
+
+Forma de uso: [green]apilizer [SUBCOMANDO] [ARGUMENTOS][/]
+
+Atualmente, existem apenas 2 subcomandos disponíveis para essa aplicação:
+
+- [b]is-rest[/]: Verifica se uma URL pertece a uma API REST
+- [b]verify-rest[/]: Verifica se uma API REST está documentada com base na URL fornecida
+
+[b]Exemplos de uso:[/]
+
+[green]apilizer is-rest [/]
+[green]apilizer verify-rest [/]
+
+[green]apilizer verify-rest https://petstore.swagger.io/v2[/]
+
+
+[b]Para mais informações: [yellow]apilizer --help[/]
+"""
+    if ctx.invoked_subcommand:
+        return
+    console.print(message)
+
+
 @app.command()
-def verify_swagger(
+def is_rest(
     url: str = Argument(
         'http://127.0.0.1:8000', help='URL of the API to verify.'
     ),
 ):
-    result = asyncio.run(check_swagger(url))
+    result = asyncio.run(is_rest_api(url))
     console.print(result)
+
+
+@app.command()
+def verify_rest(
+    url: str = Argument(
+        'http://127.0.0.1:8000', help='URL of the API to verify.'
+    ),
+):
+    result = asyncio.run(check_swagger_rest(url))
+    console.print(result)
+
+
+if __name__ == '__main__':
+    app()

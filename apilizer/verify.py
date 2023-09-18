@@ -1,58 +1,194 @@
 import json
 
 import httpx
+from bs4 import BeautifulSoup
 
 
-async def check_swagger(uri: str) -> dict:
+async def is_rest_api(uri: str) -> bool:
+    """Verifies if the given URI belongs to a REST API.
+
+    This function sends a GET request to the URI and checks the response headers and content to determine whether it is a REST API.
+
+    Parameters:
+        uri (str): The URI to be checked.
+
+    Returns:
+        bool: True if the API is REST, False otherwise.
+
+    Raises:
+        httpx.HTTPError: If there was an error making the request (handled within the function and reported to the console).
+
+    Examples:
+        >>> import asyncio
+        >>> asyncio.run(is_rest_api('http://127.0.0.1:8000')) # doctest: +SKIP
+        True
     """
-    Check if the given base URI of an API has Swagger or OpenAPI documentation available at the default '/openapi.json' or '/swagger.json' endpoints.
+    try:
+        async with httpx.AsyncClient(
+            follow_redirects=True, headers={'User-Agent': 'API Checker'}
+        ) as client:
+            url = uri.rstrip('/') + '/'
+            response = await client.get(url)
+
+        if (
+            'application/json' in response.headers.get('Content-Type', '')
+            or 'Access-Control-Allow-Origin' in response.headers
+        ):
+            return True
+
+        response_text = response.text
+        try:
+            parsed_json = json.loads(response_text)
+            if 'swagger' in parsed_json or 'openapi' in parsed_json:
+                return True
+        except json.JSONDecodeError:
+            pass
+
+        soup = BeautifulSoup(response_text, 'html.parser')
+        if (
+            'api' in response_text.lower()
+            or 'documentation' in response_text.lower()
+            or soup.find(name='paths')
+            or response.status_code in {200, 201}
+        ):
+            return True
+
+        common_endpoints = ['/api', '/v1']
+        for endpoint in common_endpoints:
+            response = await client.get(url + endpoint)
+            if response.status_code in {200, 201}:
+                return True
+
+    except httpx.HTTPError as e:
+        print(f'An HTTP error occurred: {e}')
+    except Exception as e:
+        print(f'An error occurred: {e}')
+
+    return False
+
+
+async def find_docs_in_links(client: httpx.AsyncClient, url: str) -> dict:
+    """Finds documentation in links of a given URL.
+
+    Parameters:
+        client (httpx.AsyncClient): The httpx client.
+        url (str): The URL to be checked.
+
+    Returns:
+        bool: True if the API is REST, False otherwise.
+
+    Raises:
+        httpx.HTTPError: If there was an error making the request (handled within the function and reported to the console).
+
+    Examples:
+        >>> import asyncio
+        >>> asyncio.run(find_docs_in_links(httpx.AsyncClient(), 'http://127.0.0.1:8000')) # doctest: +SKIP
+        True
+    """
+    try:
+        response = await client.get(f'{url}', timeout=10)
+        if str(response.status_code).startswith('2'):
+            soup = BeautifulSoup(response.text, 'html.parser')
+            for a in soup.find_all('a', href=True):
+                if 'doc' in a['href'].lower():
+                    return {
+                        'status': 'success',
+                        'message': f'Potential REST API documentation found at {a["href"]}',
+                        'response': response.text,
+                    }
+    except httpx.RequestError as exc:
+        return {
+            'status': 'error',
+            'message': f'An error occurred while requesting {url}: {exc}',
+            'response': [],
+        }
+
+    return None
+
+
+async def check_swagger_rest(uri: str) -> dict:
+    """Check if the given base URI of an API has REST API documentation available at various common endpoints.
 
     Parameters:
         uri (str): The base URI of the API.
 
     Returns:
-        A dictionary containing the 'status' key with values 'success' or 'failure', a 'message' key with detailed information on the status or errors encountered during the check, and a 'paths' key with the paths found in the Swagger/OpenAPI documentation.
-
-    Raises:
-        httpx.RequestError: If there was an error making the request (note: this is handled within the function and reported in the return dict).
+        dict: A dictionary containing the 'status', 'message', and 'response' keys detailing the outcome of the check.
 
     Examples:
         >>> import asyncio
-        >>> asyncio.run(check_swagger('http://127.0.0.1:8000')) # doctest: +SKIP
-        {'status': 'success', 'message': 'Swagger/OpenAPI documentation found at http://127.0.0.1:8000/openapi.json.', 'paths': { ... }}
-
-        >>> import asyncio
-        >>> asyncio.run(check_swagger('http://127.0.0.1:8000')) # doctest: +SKIP
-        {'status': 'failure', 'message': 'Could not find Swagger/OpenAPI documentation.', 'paths': {}}
+        >>> asyncio.run(check_swagger_rest('http://127.0.0.1:8000')) # doctest: +SKIP
+        {'status': 'success', 'message': 'Potential REST API documentation found at http://127.0.0.1:8000/', 'response': '{...}'}
     """
-    async with httpx.AsyncClient() as client:
-        errors = []
-        for endpoint in ('openapi.json', 'swagger.json'):
+    is_rest = await is_rest_api(uri)
+
+    if not is_rest:
+        return {
+            'status': 'error',
+            'message': f'{uri} does not appear to be a REST API.',
+            'response': [],
+        }
+
+    async with httpx.AsyncClient(
+        follow_redirects=True, headers={'User-Agent': 'API Checker'}
+    ) as client:
+        _errors = set()
+        endpoints = [
+            'openapi.json',
+            'swagger.json',
+            'docs',
+            'api-docs',
+            'swagger',
+            'swagger-ui.html',
+            'redoc',
+            'api/docs',
+            'swagger/ui',
+            '',
+        ]
+        url = uri.rstrip('/')
+        doc_links = await find_docs_in_links(client, url)
+        if doc_links:
+            return doc_links
+
+        for endpoint in endpoints:
             try:
-                response = await client.get(f'{uri}/{endpoint}')
-                if response.status_code == 200:
-                    try:
-                        paths = response.json()['paths']
-                    except:
-                        errors.append(
-                            f'No paths found in Swagger/OpenAPI documentation at {uri}/{endpoint}.'
-                        )
-                        paths = {}
-                    return {
-                        'status': 'success',
-                        'message': f'Swagger/OpenAPI documentation found at {uri}/{endpoint}.',
-                        'paths': paths,
-                    }
+                response = await client.get(f'{url}/{endpoint}', timeout=10)
+                if response.status_code // 100 == 2:
+                    if 'application/json' in response.headers.get(
+                        'Content-Type', ''
+                    ):
+                        _response = response.json()
+                    else:
+                        _response = response.text
+
+                    if any(
+                        term in str(_response).lower()
+                        for term in [
+                            'swagger',
+                            'openapi',
+                            'api',
+                            'endpoints',
+                            'documentation',
+                        ]
+                    ):
+                        return {
+                            'status': 'success',
+                            'message': f'Potential REST API documentation found at {url}/{endpoint}',
+                            'response': _response,
+                        }
                 else:
-                    errors.append(
+                    _errors.add(
                         f'{response.status_code} Client Error: {response.reason_phrase} for url: {response.url}'
                     )
+                    continue
             except httpx.RequestError as exc:
-                errors.append(str(exc))
+                _errors.add(
+                    f'An error occurred while requesting {url}/{endpoint}: {exc}'
+                )
                 continue
 
         return {
-            'status': 'failure',
-            'message': f'Could not find Swagger/OpenAPI documentation. Errors encountered: {errors}',
-            'paths': {},
+            'status': 'error',
+            'message': 'No REST API documentation found.',
+            'response': list(_errors),
         }
