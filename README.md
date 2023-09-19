@@ -18,7 +18,7 @@
 - [Como usar?](#como-usar)
 - [Dependências](#dependências)
 - [Como contribuir](#como-contribuir)
-- [Autores](#autores)
+- [Equipe](#equipe)
 - [Licença](#licença)
 
 
@@ -105,23 +105,30 @@ Há várias formas de contribuir com o projeto, com código, testes, documentaç
 Acesse a documentação do projeto na seção [Documentação](#documentação) para saber mais sobre como contribuir com o projeto.
 
 
-## Autores
+## Equipe
 
-### Coordenador
+### Autor
 
 #### Marco Antônio Martins Porto Netto
 
-[![GitHub](https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Tchez)
+[![GitHub](https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Tchez/)
 [![LinkedIn](https://img.shields.io/badge/linkedin-%230077B5.svg?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/tchez/)
 
 ### Desenvolvedores
 
+#### Thiago Schuch
+
+[![GitHub](https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Thigschuch/)
+[![LinkedIn](https://img.shields.io/badge/linkedin-%230077B5.svg?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/thiago-schuch/)
+
 #### Wendhel Valeriano De Almeida Cruz
 
+[![GitHub](https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=white)](https://github.com/wendhelv/)
 [![LinkedIn](https://img.shields.io/badge/linkedin-%230077B5.svg?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/wendhelvaleriano/)
 
 #### Yan Sardinha
 
+[![GitHub](https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=white)](https://github.com/YanSardinha/)
 [![LinkedIn](https://img.shields.io/badge/linkedin-%230077B5.svg?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/yan-sardinha/)
 
 
