@@ -37,7 +37,21 @@ Acesse a documentação contendo todos os detalhes do projeto em:
  
 ## Guia de instalação
 
-Para instalar a biblioteca, basta executar o comando abaixo:
+Para instalar a biblioteca, recomendamos a criação de um ambiente virtual, para que a mesma seja instalada de forma isolada. Para isso, basta executar os comandos abaixo:
+
+Criar ambiente virtual:
+```bash
+python -m venv .venv
+```	
+
+Ativar ambiente virtual:
+```bash
+source .venv/bin/activate # Linux
+.venv\Scripts\activate # Windows
+```
+
+
+Instalar a biblioteca:
 
 ```bash
 pip install apilyzer
@@ -45,21 +59,42 @@ pip install apilyzer
 
 ## Como usar?
 
-A biblioteca oferece uma CLI para que você possa analizar APIs REST via linha de comando. Para isso, basta executar o comando abaixo:
+A biblioteca oferece uma CLI para que você possa analizar APIs REST via linha de comando. Para saber quais são os comandos disponíveis, basta executar o comando abaixo:
 
 ```bash
-apilyzer <url>
+apilyzer
+```
+
+Esse comando retornará uma lista com os comandos disponíveis, que no momento são:
+<!-- message = """
+
+Forma de uso: [green]apilyzer [SUBCOMANDO] [ARGUMENTOS][/]
+
+Atualmente, existem apenas 2 subcomandos disponíveis para essa aplicação:
+
+- [b]is-rest[/]: Verifica se uma URL pertece a uma API REST
+- [b]verify-rest[/]: Verifica se uma API REST está documentada com base na URL fornecida
+
+[b]Exemplos de uso:[/]
+
+[green]apilyzer is-rest [/]
+[green]apilyzer verify-rest [/]
+
+[green]apilyzer verify-rest https://petstore.swagger.io/v2[/]
+
+
+[b]Para mais informações: [yellow]apilyzer --help[/]
+""" -->
+```bash
+apilizer is-rest <url>
+apilizer verify-rest <url>
 ```
 
 Onde `<url>` é a url da API que você deseja analizar, que caso não seja informada, será utilizada a url `http://localhost:8000`. Por exemplo:
 
 ```bash
-apilyzer https://myapi.com
+apilyzer verify-rest https://myapi.com
 ```
-
-O comando acima irá analizar a URL `https://myapi.com` e gerar um relatório com o nível de maturidade da mesma, além de recomendações de melhorias para que a API atinja o nível de maturidade desejado.
-> Lembrando que a biblioteca ainda está em desenvolvimento, portanto, no momento a biblioteca analiza apenas se a API possui swagger e se os endpoints estão documentados corretamente.
-
 
 ## Mais informações sobre o CLI
 
@@ -70,7 +105,6 @@ apilyzer --help
 ```
 
 Para mais informações sobre os subcomandos do CLI, basta executar o comando abaixo:
-> no momento não há subcomandos
 
 ```bash
 apilyzer <subcomando> --help
@@ -92,7 +126,6 @@ Principais dependências do projeto:
     blue = "^0.9.1"
     isort = "^5.12.0"
     taskipy = "^1.12.0"
-    respx = "^0.20.2"
 
     # Documentação
     mkdocs-material = "^9.3.1"
@@ -114,6 +147,8 @@ Acesse a documentação do projeto na seção [Documentação](#documentação) 
 
 [![GitHub](https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Tchez/)
 [![LinkedIn](https://img.shields.io/badge/linkedin-%230077B5.svg?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/tchez/)
+
+<br/>
 
 ### Desenvolvedores
 

@@ -1,15 +1,12 @@
 import asyncio
 
-import pytest
-
-from apilyzer.verify import check_swagger_rest, find_docs_in_links, is_rest_api
+from apilyzer.verify import check_swagger_rest, is_rest_api
 
 
 def test_rest_api_true():
-    assert asyncio.run(is_rest_api('https://pokeapi.co/api/v2/')) is True
+    assert asyncio.run(is_rest_api('https://petstore.swagger.io/v2')) is True
 
 
-@pytest.mark.skip(reason='Needs to be fixed. Error known.')
 def test_is_rest_api_false():
     assert asyncio.run(is_rest_api('https://google.com')) is False
 
@@ -19,20 +16,19 @@ def test_url_is_rest_api_invalid():
 
 
 def test_check_swagger_rest_success_doc():
-    result = asyncio.run(check_swagger_rest('https://pokeapi.co/api/v2/'))
+    result = asyncio.run(check_swagger_rest('https://petstore.swagger.io/v2'))
     assert result['status'] == 'success'
     assert (
-        'Potential REST API documentation found at https://pokeapi.co/api/v2/'
+        'Potential REST API documentation found at https://petstore.swagger.io/v2'
         in result['message']
     )
 
 
-@pytest.mark.skip(reason='Needs to be fixed. Error known.')
 def test_check_swagger_rest_no_doc():
     result = asyncio.run(check_swagger_rest('https://google.com'))
-    assert result['status'] == 'failure'
+    assert result['status'] == 'error'
     assert (
-        'Could not find REST API documentation. Errors encountered: ['
+        'https://google.com does not appear to be a REST API'
         in result['message']
     )
 

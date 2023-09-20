@@ -49,7 +49,6 @@ async def is_rest_api(uri: str) -> bool:
             'api' in response_text.lower()
             or 'documentation' in response_text.lower()
             or soup.find(name='paths')
-            or response.status_code in {200, 201}
         ):
             return True
 
@@ -65,45 +64,6 @@ async def is_rest_api(uri: str) -> bool:
         print(f'An error occurred: {e}')
 
     return False
-
-
-async def find_docs_in_links(client: httpx.AsyncClient, url: str) -> dict:
-    """Finds documentation in links of a given URL.
-
-    Parameters:
-        client (httpx.AsyncClient): The httpx client.
-        url (str): The URL to be checked.
-
-    Returns:
-        bool: True if the API is REST, False otherwise.
-
-    Raises:
-        httpx.HTTPError: If there was an error making the request (handled within the function and reported to the console).
-
-    Examples:
-        >>> import asyncio
-        >>> asyncio.run(find_docs_in_links(httpx.AsyncClient(), 'http://127.0.0.1:8000')) # doctest: +SKIP
-        True
-    """
-    try:
-        response = await client.get(f'{url}', timeout=10)
-        if str(response.status_code).startswith('2'):
-            soup = BeautifulSoup(response.text, 'html.parser')
-            for a in soup.find_all('a', href=True):
-                if 'doc' in a['href'].lower():
-                    return {
-                        'status': 'success',
-                        'message': f'Potential REST API documentation found at {a["href"]}',
-                        'response': response.text,
-                    }
-    except httpx.RequestError as exc:
-        return {
-            'status': 'error',
-            'message': f'An error occurred while requesting {url}: {exc}',
-            'response': [],
-        }
-
-    return None
 
 
 async def check_swagger_rest(uri: str) -> dict:
@@ -146,9 +106,6 @@ async def check_swagger_rest(uri: str) -> dict:
             '',
         ]
         url = uri.rstrip('/')
-        doc_links = await find_docs_in_links(client, url)
-        if doc_links:
-            return doc_links
 
         for endpoint in endpoints:
             try:
