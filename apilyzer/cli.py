@@ -3,7 +3,7 @@ import asyncio
 from rich.console import Console
 from typer import Argument, Context, Typer
 
-from apilizer.verify import check_swagger_rest, is_rest_api
+from apilyzer.verify import check_swagger_rest, is_rest_api
 
 console = Console()
 app = Typer()
@@ -15,7 +15,7 @@ def main(
 ):
     message = """
 
-Forma de uso: [green]apilizer [SUBCOMANDO] [ARGUMENTOS][/]
+Forma de uso: [green]apilyzer [SUBCOMANDO] [ARGUMENTOS][/]
 
 Atualmente, existem apenas 2 subcomandos disponíveis para essa aplicação:
 
@@ -24,13 +24,13 @@ Atualmente, existem apenas 2 subcomandos disponíveis para essa aplicação:
 
 [b]Exemplos de uso:[/]
 
-[green]apilizer is-rest [/]
-[green]apilizer verify-rest [/]
+[green]apilyzer is-rest [/]
+[green]apilyzer verify-rest [/]
 
-[green]apilizer verify-rest https://petstore.swagger.io/v2[/]
+[green]apilyzer verify-rest https://petstore.swagger.io/v2[/]
 
 
-[b]Para mais informações: [yellow]apilizer --help[/]
+[b]Para mais informações: [yellow]apilyzer --help[/]
 """
     if ctx.invoked_subcommand:
         return

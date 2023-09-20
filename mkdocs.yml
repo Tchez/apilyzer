@@ -1,6 +1,6 @@
-site_name: apilizer - Analisador de API
-repo_url: https://github.com/Tchez/apilizer
-repo_name: tchez/apilizer
+site_name: apilyzer - Analisador de API
+repo_url: https://github.com/Tchez/apilyzer
+repo_name: tchez/apilyzer
 edit_uri: tree/main/docs
 
 theme:
@@ -19,4 +19,4 @@ plugins:
 - mkdocstrings:
     handlers:
       python: 
-        paths: [apilizer]
+        paths: [apilyzer]

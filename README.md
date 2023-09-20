@@ -1,14 +1,15 @@
-<h1 align="center"> APIlizer </h1>
+<h1 align="center"> APIlyzer </h1>
 
 > English documentation version in progress...
 
-![Logo temporária](./docs/assets/temp_logo.jpg)
+<img src="https://apilizer.readthedocs.io/en/latest/assets/temp_logo.jpg" width="400" style="display: block; margin: 20px auto;">
 
 
-[![Documentation Status](https://readthedocs.org/projects/apilizer/badge/?version=latest)](https://apilizer.readthedocs.io/en/latest/?badge=latest)
-[![CI](https://github.com/tchez/apilizer/actions/workflows/pipeline.yaml/badge.svg)](https://github.com/tchez/apilizer/actions/workflows/pipeline.yaml)
-[![codecov](https://codecov.io/gh/tchez/apilizer/branch/main/graph/badge.svg?token=OVQQF4IQY2)](https://codecov.io/gh/tchez/apilizer)
-[![PyPI version](https://badge.fury.io/py/apilizer.svg)](https://badge.fury.io/py/apilizer)
+
+[![Documentation Status](https://readthedocs.org/projects/apilyzer/badge/?version=latest)](https://apilyzer.readthedocs.io/en/latest/?badge=latest)
+[![CI](https://github.com/tchez/apilyzer/actions/workflows/pipeline.yaml/badge.svg)](https://github.com/tchez/apilyzer/actions/workflows/pipeline.yaml)
+[![codecov](https://codecov.io/gh/tchez/apilyzer/branch/main/graph/badge.svg?token=OVQQF4IQY2)](https://codecov.io/gh/tchez/apilyzer)
+[![PyPI version](https://badge.fury.io/py/apilyzer.svg)](https://badge.fury.io/py/apilyzer)
 
 ## Tabela de conteúdos:
 
@@ -24,14 +25,14 @@
 
 ## Descrição e contexto
 
-O APIlizer é uma biblioteca python que tem como objetivo analizar o nível de maturidade de APIs REST, seguindo o modelo de maturidade de Richardson. O objetivo da biblioteca é ser capaz de analizar APIs e gerar um relatório com o nível de maturidade da mesma, além de recomendações de melhorias para que a API atinja o nível de maturidade desejado.
+O APIlyzer é uma biblioteca python que tem como objetivo analizar o nível de maturidade de APIs REST, seguindo o modelo de maturidade de Richardson. O objetivo da biblioteca é ser capaz de analizar APIs e gerar um relatório com o nível de maturidade da mesma, além de recomendações de melhorias para que a API atinja o nível de maturidade desejado.
 > Observação: A biblioteca ainda está em desenvolvimento, portanto, não possui todas as funcionalidades que queremos implementar.
 
 
 ## Documentação
 
 Acesse a documentação contendo todos os detalhes do projeto em: 
-[https://apilizer.readthedocs.io/en/latest/](https://apilizer.readthedocs.io/en/latest/)
+[https://apilyzer.readthedocs.io/en/latest/](https://apilyzer.readthedocs.io/en/latest/)
 
  
 ## Guia de instalação
@@ -39,7 +40,7 @@ Acesse a documentação contendo todos os detalhes do projeto em:
 Para instalar a biblioteca, basta executar o comando abaixo:
 
 ```bash
-pip install apilizer
+pip install apilyzer
 ```
 
 ## Como usar?
@@ -47,13 +48,13 @@ pip install apilizer
 A biblioteca oferece uma CLI para que você possa analizar APIs REST via linha de comando. Para isso, basta executar o comando abaixo:
 
 ```bash
-apilizer <url>
+apilyzer <url>
 ```
 
 Onde `<url>` é a url da API que você deseja analizar, que caso não seja informada, será utilizada a url `http://localhost:8000`. Por exemplo:
 
 ```bash
-apilizer https://myapi.com
+apilyzer https://myapi.com
 ```
 
 O comando acima irá analizar a URL `https://myapi.com` e gerar um relatório com o nível de maturidade da mesma, além de recomendações de melhorias para que a API atinja o nível de maturidade desejado.
@@ -65,14 +66,14 @@ O comando acima irá analizar a URL `https://myapi.com` e gerar um relatório co
 Para mais informações sobre o CLI, basta executar o comando abaixo:
 
 ```bash
-apilizer --help
+apilyzer --help
 ```
 
 Para mais informações sobre os subcomandos do CLI, basta executar o comando abaixo:
 > no momento não há subcomandos
 
 ```bash
-apilizer <subcomando> --help
+apilyzer <subcomando> --help
 ```
 
 

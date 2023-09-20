@@ -2,7 +2,7 @@ import asyncio
 
 import pytest
 
-from apilizer.verify import check_swagger_rest, find_docs_in_links, is_rest_api
+from apilyzer.verify import check_swagger_rest, find_docs_in_links, is_rest_api
 
 
 def test_rest_api_true():

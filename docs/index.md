@@ -7,7 +7,7 @@
 Você pode analisar sua API via linha de comando. Para isso, basta executar o seguinte comando:
 
 ```bash
-apilizer
+apilyzer
 ```
 
 Retorno esperado:
@@ -22,7 +22,7 @@ Retorno esperado:
 Caso queira analisar uma API que não esteja rodando em `localhost`, basta passar a URL como parâmetro:
 
 ```bash
-apilizer <url>
+apilyzer <url>
 ```
 
 Retorno esperado:
@@ -39,5 +39,5 @@ Retorno esperado:
 Para mais informações sobre o CLI, basta usar a flag `--help`:
 
 ```bash
-apilizer --help
+apilyzer --help
 ```

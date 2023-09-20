@@ -1,27 +1,27 @@
 [tool.poetry]
-name = "apilizer"
+name = "apilyzer"
 version = "0.1.3"
-description = "APIlizer is a python library that aims to analyze the level of maturity of REST APIs, following the Richardson maturity model"
+description = "APIlyzer is a python library that aims to analyze the level of maturity of REST APIs, following the Richardson maturity model"
 license = "MIT"
 authors = ["Marco Antônio <marcomartins06@rede.ulbra.br>"]
 readme = "README.md"
-packages = [{ include = "apilizer" }]
+packages = [{ include = "apilyzer" }]
 classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Environment :: Console",
     "Development Status :: 2 - Pre-Alpha",
-    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.9",
     "Intended Audience :: Developers",
 ]
 
 [tool.poetry.urls]
-"Documentation" = "https://apilizer.readthedocs.io/en/latest/"
-"Source Code" = "https://github.com/Tchez/apilizer"
-"Bug Tracker" = "https://github.com/Tchez/apilizer/issues"
+"Documentation" = "https://apilyzer.readthedocs.io/en/latest/"
+"Source Code" = "https://github.com/Tchez/apilyzer"
+"Bug Tracker" = "https://github.com/Tchez/apilyzer/issues"
 
 
 [tool.poetry.scripts]
-apilizer = "apilizer.cli:app"
+apilyzer = "apilyzer.cli:app"
 
 
 [tool.poetry.dependencies]
@@ -62,5 +62,5 @@ line_length = 79
 lint = "blue --check --diff . && isort --check --diff ."
 docs = "mkdocs serve"
 pre_test = "task lint"
-test = "pytest -s -x --cov=apilizer -vv"
+test = "pytest -s -x --cov=apilyzer -vv"
 post_test = "coverage html"

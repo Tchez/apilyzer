@@ -1,7 +1,7 @@
 from pytest import mark
 from typer.testing import CliRunner
 
-from apilizer.cli import app
+from apilyzer.cli import app
 
 runner = CliRunner()
 
