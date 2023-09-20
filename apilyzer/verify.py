@@ -149,3 +149,114 @@ async def check_swagger_rest(uri: str) -> dict:
             'message': 'No REST API documentation found.',
             'response': list(_errors),
         }
+
+
+async def _verify_maturity_paths(paths: dict) -> dict:
+    """Verify the maturity level of the API's paths according to Richardson's maturity model.
+
+    Parameters:
+        paths (dict): The paths of the API.
+
+    Returns:
+        dict: A dictionary containing feedback on the maturity level of the API's paths.
+    """
+    feedback = {}
+    messages = []
+
+    _has_only_post_method = True
+    _returns_right_post_status_code = True
+
+    for path, path_info in paths.items():
+        match path_info:
+            case {'get': _}:
+                _has_only_post_method = False
+
+            case {'post': _}:
+                if (
+                    path_info['post']
+                    .get('responses', {})
+                    .get('201', {})
+                    .get('description', '')
+                    != 'Created'
+                ):
+                    messages.append(
+                        f"⚠️   Oh no! The {path.upper()} {path} method returns the wrong status code for POST requests. It is at level 0 of Richardson's maturity model."
+                    )
+                else:
+                    messages.append(
+                        f"✅   Congratulations! The API returns the correct status code for POST requests. It is at least at level 2 of Richardson's maturity model."
+                    )
+
+            case {'put': _}:
+                _has_only_post_method = False
+                if (
+                    path_info['put']
+                    .get('responses', {})
+                    .get('200', {})
+                    .get('description', '')
+                    != 'OK'
+                ):
+                    ...
+            case {'patch': _}:
+                _has_only_post_method = False
+                if (
+                    path_info['patch']
+                    .get('responses', {})
+                    .get('200', {})
+                    .get('description', '')
+                    != 'OK'
+                ):
+                    ...
+            case {'delete': _}:
+                _has_only_post_method = False
+                if (
+                    path_info['delete']
+                    .get('responses', {})
+                    .get('200', {})
+                    .get('description', '')
+                    != 'OK'
+                ):
+                    ...
+            case _:
+                continue
+
+    if _has_only_post_method:
+        message = "⚠️   Oh no! The API only has POST methods. It is at level 0 of Richardson's maturity model."
+    else:
+        message = "✅   Congratulations! The API has methods other than POST. It is at least at level 1 of Richardson's maturity model."
+
+    messages.append(message)
+
+    feedback['messages'] = messages
+    return feedback
+
+
+async def analyze_api_maturity(uri: str) -> dict:
+    """Analyze the maturity level of a REST API using Richardson's maturity model.
+
+    Parameters:
+        uri (str): The base URI of the API.
+
+    Returns:
+        dict: A dictionary containing feedback on the API's maturity level according to Richardson's maturity model.
+    """
+    feedbacks = {}
+
+    swagger_doc = await check_swagger_rest(uri)
+
+    if swagger_doc['status'] == 'error':
+        return swagger_doc
+
+    paths = swagger_doc['response'].get('paths', {})
+
+    if not paths:
+        return {
+            'status': 'error',
+            'message': 'The API is documented, but no paths were found.',
+            'response': [],
+        }
+
+    feedback = await _verify_maturity_paths(paths)
+
+    feedbacks['feedback'] = feedback
+    return feedbacks
