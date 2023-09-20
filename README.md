@@ -66,25 +66,7 @@ apilyzer
 ```
 
 Esse comando retornará uma lista com os comandos disponíveis, que no momento são:
-<!-- message = """
 
-Forma de uso: [green]apilyzer [SUBCOMANDO] [ARGUMENTOS][/]
-
-Atualmente, existem apenas 2 subcomandos disponíveis para essa aplicação:
-
-- [b]is-rest[/]: Verifica se uma URL pertece a uma API REST
-- [b]verify-rest[/]: Verifica se uma API REST está documentada com base na URL fornecida
-
-[b]Exemplos de uso:[/]
-
-[green]apilyzer is-rest [/]
-[green]apilyzer verify-rest [/]
-
-[green]apilyzer verify-rest https://petstore.swagger.io/v2[/]
-
-
-[b]Para mais informações: [yellow]apilyzer --help[/]
-""" -->
 ```bash
 apilizer is-rest <url>
 apilizer verify-rest <url>
