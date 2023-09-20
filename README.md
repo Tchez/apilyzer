@@ -1,6 +1,6 @@
-<h1 align="center"> APIlyzer </h1>
-
 > English documentation version in progress...
+
+<h1 align="center"> APIlyzer </h1>
 
 <img src="https://apilizer.readthedocs.io/en/latest/assets/temp_logo.jpg" width="400" style="display: block; margin: 20px auto;">
 
