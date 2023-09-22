@@ -162,6 +162,7 @@ async def _verify_maturity_paths(paths: dict) -> dict:
     """
     feedback = {}
     messages = []
+    status = ''
     _has_only_post_method = True
     valid_methods = ['get', 'post', 'put', 'patch', 'delete']
 
@@ -273,5 +274,9 @@ async def analyze_api_maturity(uri: str) -> dict:
 
     feedback = await _verify_maturity_paths(paths)
 
+    status = 'success' if feedback['messages'] else 'error'
+
+    feedbacks['status'] = status
     feedbacks['feedback'] = feedback
+
     return feedbacks

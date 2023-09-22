@@ -1,6 +1,10 @@
 import asyncio
 
-from apilyzer.verify import check_swagger_rest, is_rest_api
+from apilyzer.verify import (
+    analyze_api_maturity,
+    check_swagger_rest,
+    is_rest_api,
+)
 
 
 def test_rest_api_true():
@@ -40,3 +44,18 @@ def test_check_swagger_rest_invalid_url():
     assert (
         f'{invalid_url} does not appear to be a REST API.' in result['message']
     )
+
+
+def test_analyze_api_maturity():
+    result = asyncio.run(
+        analyze_api_maturity('https://petstore.swagger.io/v2')
+    )
+    assert result['status'] == 'success'
+    assert result['feedback']['messages'] is not None
+
+
+def test_analyze_api_maturity_invalid_url():
+    result = asyncio.run(analyze_api_maturity('invalid_url'))
+    breakpoint()
+    assert result['status'] == 'error'
+    assert 'invalid_url does not appear to be a REST API.' in result['message']
