@@ -2,7 +2,7 @@
 
 <h1 align="center"> APIlyzer </h1>
 
-<img src="https://apilizer.readthedocs.io/en/latest/assets/temp_logo.jpg" width="400" style="display: block; margin: 20px auto;">
+<img src="https://apilyzer.readthedocs.io/en/latest/assets/temp_logo.jpg" width="400" style="display: block; margin: 20px auto;">
 
 
 
@@ -68,8 +68,8 @@ apilyzer
 Esse comando retornará uma lista com os comandos disponíveis, que no momento são:
 
 ```bash
-apilizer is-rest <url>
-apilizer verify-rest <url>
+apilyzer is-rest <url>
+apilyzer verify-rest <url>
 ```
 
 Onde `<url>` é a url da API que você deseja analizar, que caso não seja informada, será utilizada a url `http://localhost:8000`. Por exemplo:
