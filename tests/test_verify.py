@@ -56,6 +56,5 @@ def test_analyze_api_maturity():
 
 def test_analyze_api_maturity_invalid_url():
     result = asyncio.run(analyze_api_maturity('invalid_url'))
-    breakpoint()
     assert result['status'] == 'error'
     assert 'invalid_url does not appear to be a REST API.' in result['message']
