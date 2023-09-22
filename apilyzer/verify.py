@@ -162,66 +162,58 @@ async def _verify_maturity_paths(paths: dict) -> dict:
     """
     feedback = {}
     messages = []
-
     _has_only_post_method = True
-    _returns_right_post_status_code = True
+    valid_methods = ['get', 'post', 'put', 'patch', 'delete']
 
     for path, path_info in paths.items():
-        match path_info:
-            case {'get': _}:
-                _has_only_post_method = False
+        for method in path_info.keys():
+            if method not in valid_methods:
+                messages.append(
+                    f"🚫   Error! The {path} method uses a non-conventional {method.upper()} method. "
+                    f"Consider following the standard RESTful methods for better maturity."
+                )
 
-            case {'post': _}:
-                if (
-                    path_info['post']
-                    .get('responses', {})
-                    .get('201', {})
-                    .get('description', '')
-                    != 'Created'
-                ):
-                    messages.append(
-                        f"⚠️   Oh no! The {path.upper()} {path} method returns the wrong status code for POST requests. It is at level 0 of Richardson's maturity model."
-                    )
+        if 'get' in path_info:
+            _has_only_post_method = False
+
+        for method, expected_status, expected_description in [
+            ('post', '201', 'Created'),
+            ('put', '200', 'OK'),
+            ('patch', '200', 'OK'),
+            ('delete', '200', 'OK'),
+        ]:
+            if method in path_info:
+                _has_only_post_method = False if method != 'post' else _has_only_post_method
+
+                actual_status = next(iter(path_info[method].get('responses', {}).keys()), None)
+                actual_description = path_info[method].get('responses', {}).get(expected_status, {}).get('description', '')
+                
+                if actual_status == expected_status:
+                    if actual_description != expected_description:
+                        messages.append(
+                            f"⚠️   Warning! The {path} method returns the correct status code for {method.upper()} requests. "
+                            f"However, the description could be '{expected_description}' according to Richardson's model."
+                        )
+                    else:
+                        messages.append(
+                            f"✅   Congratulations! The {path} method returns the correct status code and description for {method.upper()} requests. "
+                            f"It aligns with Richardson's maturity model."
+                        )
                 else:
-                    messages.append(
-                        f"✅   Congratulations! The API returns the correct status code for POST requests. It is at least at level 2 of Richardson's maturity model."
-                    )
-
-            case {'put': _}:
-                _has_only_post_method = False
-                if (
-                    path_info['put']
-                    .get('responses', {})
-                    .get('200', {})
-                    .get('description', '')
-                    != 'OK'
-                ):
-                    ...
-            case {'patch': _}:
-                _has_only_post_method = False
-                if (
-                    path_info['patch']
-                    .get('responses', {})
-                    .get('200', {})
-                    .get('description', '')
-                    != 'OK'
-                ):
-                    ...
-            case {'delete': _}:
-                _has_only_post_method = False
-                if (
-                    path_info['delete']
-                    .get('responses', {})
-                    .get('200', {})
-                    .get('description', '')
-                    != 'OK'
-                ):
-                    ...
-            case _:
-                continue
+                    if actual_description:
+                        messages.append(
+                            f"🚫   Error! The {path} method returns the wrong status code for {method.upper()} requests. "
+                            f"Expected: {expected_status} but got: {actual_status}. "
+                            f"It is at level 0 of Richardson's maturity model."
+                        )
+                    else:
+                        messages.append(
+                            f"🚫   Error! The {path} method does not provide any response status or description for {method.upper()} requests. "
+                            f"It is at level 0 of Richardson's maturity model."
+                        )
 
     if _has_only_post_method:
-        message = "⚠️   Oh no! The API only has POST methods. It is at level 0 of Richardson's maturity model."
+        message = "🚫   Error! The API only has POST methods. It is at level 0 of Richardson's maturity model."
     else:
         message = "✅   Congratulations! The API has methods other than POST. It is at least at level 1 of Richardson's maturity model."
 
@@ -247,13 +239,27 @@ async def analyze_api_maturity(uri: str) -> dict:
     if swagger_doc['status'] == 'error':
         return swagger_doc
 
-    paths = swagger_doc['response'].get('paths', {})
+    response = swagger_doc['response']
+    
+    if isinstance(response, str):
+        try:
+            response = json.loads(response)
+        
+        except json.JSONDecodeError:
+            return {
+                'status': 'error',
+                'message': f'The API is documented, but the documentation is not valid JSON. Please check the documentation at {uri}.',
+                'check_swagger_response': swagger_doc,
+            }
 
-    if not paths:
+    try:
+        paths = response.get('paths', {})
+        
+    except AttributeError:
         return {
             'status': 'error',
             'message': 'The API is documented, but no paths were found.',
-            'response': [],
+            'check_swagger_response': swagger_doc,
         }
 
     feedback = await _verify_maturity_paths(paths)
