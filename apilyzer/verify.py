@@ -169,8 +169,8 @@ async def _verify_maturity_paths(paths: dict) -> dict:
         for method in path_info.keys():
             if method not in valid_methods:
                 messages.append(
-                    f"🚫   Error! The {path} method uses a non-conventional {method.upper()} method. "
-                    f"Consider following the standard RESTful methods for better maturity."
+                    f'🚫   Error! The {path} method uses a non-conventional {method.upper()} method. '
+                    f'Consider following the standard RESTful methods for better maturity.'
                 )
 
         if 'get' in path_info:
@@ -183,32 +183,41 @@ async def _verify_maturity_paths(paths: dict) -> dict:
             ('delete', '200', 'OK'),
         ]:
             if method in path_info:
-                _has_only_post_method = False if method != 'post' else _has_only_post_method
+                _has_only_post_method = (
+                    False if method != 'post' else _has_only_post_method
+                )
 
-                actual_status = next(iter(path_info[method].get('responses', {}).keys()), None)
-                actual_description = path_info[method].get('responses', {}).get(expected_status, {}).get('description', '')
-                
+                actual_status = next(
+                    iter(path_info[method].get('responses', {}).keys()), None
+                )
+                actual_description = (
+                    path_info[method]
+                    .get('responses', {})
+                    .get(expected_status, {})
+                    .get('description', '')
+                )
+
                 if actual_status == expected_status:
                     if actual_description != expected_description:
                         messages.append(
-                            f"⚠️   Warning! The {path} method returns the correct status code for {method.upper()} requests. "
+                            f'⚠️   Warning! The {path} method returns the correct status code for {method.upper()} requests. '
                             f"However, the description could be '{expected_description}' according to Richardson's model."
                         )
                     else:
                         messages.append(
-                            f"✅   Congratulations! The {path} method returns the correct status code and description for {method.upper()} requests. "
+                            f'✅   Congratulations! The {path} method returns the correct status code and description for {method.upper()} requests. '
                             f"It aligns with Richardson's maturity model."
                         )
                 else:
                     if actual_description:
                         messages.append(
-                            f"🚫   Error! The {path} method returns the wrong status code for {method.upper()} requests. "
-                            f"Expected: {expected_status} but got: {actual_status}. "
+                            f'🚫   Error! The {path} method returns the wrong status code for {method.upper()} requests. '
+                            f'Expected: {expected_status} but got: {actual_status}. '
                             f"It is at level 0 of Richardson's maturity model."
                         )
                     else:
                         messages.append(
-                            f"🚫   Error! The {path} method does not provide any response status or description for {method.upper()} requests. "
+                            f'🚫   Error! The {path} method does not provide any response status or description for {method.upper()} requests. '
                             f"It is at level 0 of Richardson's maturity model."
                         )
 
@@ -240,11 +249,11 @@ async def analyze_api_maturity(uri: str) -> dict:
         return swagger_doc
 
     response = swagger_doc['response']
-    
+
     if isinstance(response, str):
         try:
             response = json.loads(response)
-        
+
         except json.JSONDecodeError:
             return {
                 'status': 'error',
@@ -254,7 +263,7 @@ async def analyze_api_maturity(uri: str) -> dict:
 
     try:
         paths = response.get('paths', {})
-        
+
     except AttributeError:
         return {
             'status': 'error',
