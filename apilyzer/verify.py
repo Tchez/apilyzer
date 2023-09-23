@@ -1,7 +1,6 @@
 import json
 
 import httpx
-from bs4 import BeautifulSoup
 
 
 async def is_rest_api(uri: str) -> bool:
@@ -43,14 +42,6 @@ async def is_rest_api(uri: str) -> bool:
                 return True
         except json.JSONDecodeError:
             pass
-
-        soup = BeautifulSoup(response_text, 'html.parser')
-        if (
-            'api' in response_text.lower()
-            or 'documentation' in response_text.lower()
-            or soup.find(name='paths')
-        ):
-            return True
 
         common_endpoints = ['/api', '/v1']
         for endpoint in common_endpoints:
@@ -99,7 +90,6 @@ async def check_swagger_rest(uri: str) -> dict:
             'docs',
             'api-docs',
             'swagger',
-            'swagger-ui.html',
             'redoc',
             'api/docs',
             'swagger/ui',
@@ -162,7 +152,6 @@ async def _verify_maturity_paths(paths: dict) -> dict:
     """
     feedback = {}
     messages = []
-    status = ''
     _has_only_post_method = True
     valid_methods = ['get', 'post', 'put', 'patch', 'delete']
 
@@ -201,8 +190,10 @@ async def _verify_maturity_paths(paths: dict) -> dict:
                 if actual_status == expected_status:
                     if actual_description != expected_description:
                         messages.append(
-                            f'⚠️   Warning! The {path} method returns the correct status code for {method.upper()} requests. '
-                            f"However, the description could be '{expected_description}' according to Richardson's model."
+                            f'✅   Congratulations! The {path} method returns the correct status code for {method.upper()} requests.'
+                        )
+                        messages.append(
+                            f'⚠️   Warning! Richardson\'s maturity model recommends using "{expected_description}" as the description for {method.upper()} requests.'
                         )
                     else:
                         messages.append(
