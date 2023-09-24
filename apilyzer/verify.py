@@ -142,7 +142,19 @@ async def check_swagger_rest(uri: str) -> dict:
 
 
 async def _supports_https(uri: str) -> dict:
-    """Check if the URI supports HTTPS."""
+    """Check if the given base URI of an API has support to HTTPS protocol.
+
+    Parameters:
+        uri (str): The base URI of the API.
+
+    Returns:
+        dict: A dictionary containing the 'status', 'message', and 'response' keys detailing the outcome of the check.
+
+    Examples:
+        >>> import asyncio
+        >>> asyncio.run(_supports_https('http://127.0.0.1:8000')) # doctest: +SKIP
+        {'status': 'success', 'message': 'The URI does not support HTTPS at http://127.0.0.1:8000/. ', 'response': '{...}'}
+    """
 
     https_uri = (
         uri.replace('http://', 'https://')
