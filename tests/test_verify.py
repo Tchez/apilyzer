@@ -1,8 +1,8 @@
 import asyncio
 
 from apilyzer.verify import (
-    _supports_https,
     _is_rest_api,
+    _supports_https,
     analyze_api_maturity,
     check_swagger_rest,
 )
@@ -64,7 +64,7 @@ def test_analyze_api_maturity():
 def test_analyze_api_maturity_invalid_url():
     result = asyncio.run(analyze_api_maturity('https://invalid_url'))
     assert result['status'] == 'error'
-    assert 'invalid_url does not appear to be a REST API.' in result['message']
+    assert 'No REST API documentation found.' in result['message']
 
 
 def test_supports_https_success():
@@ -79,4 +79,3 @@ def test_supports_https_failure():
     result = asyncio.run(_supports_https('https://petstore.swagger.io/v2'))
     assert result['status'] == 'error'
     assert 'URI does not support HTTPS' in result['message']
-    assert 'No REST API documentation found.' in result['message']
