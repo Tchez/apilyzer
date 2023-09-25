@@ -1,12 +1,14 @@
 import json
+import xml.etree.ElementTree as ET
 
 import httpx
 
 
-async def is_rest_api(uri: str) -> bool:
+async def _is_rest_api(uri: str) -> bool:
     """Verifies if the given URI belongs to a REST API.
 
     This function sends a GET request to the URI and checks the response headers and content to determine whether it is a REST API.
+    Currently, this function recognizes only APIs that return JSON or XML content.
 
     Parameters:
         uri (str): The URI to be checked.
@@ -19,40 +21,53 @@ async def is_rest_api(uri: str) -> bool:
 
     Examples:
         >>> import asyncio
-        >>> asyncio.run(is_rest_api('http://127.0.0.1:8000')) # doctest: +SKIP
+        >>> asyncio.run(_is_rest_api('http://127.0.0.1:8000')) # doctest: +SKIP
         True
     """
+    if not uri.startswith('http') or not uri.startswith('https'):
+        return False
+
     try:
         async with httpx.AsyncClient(
             follow_redirects=True, headers={'User-Agent': 'API Checker'}
         ) as client:
             url = uri.rstrip('/') + '/'
-            response = await client.get(url)
+            response = await client.get(url, timeout=10)
 
-        if (
-            'application/json' in response.headers.get('Content-Type', '')
-            or 'Access-Control-Allow-Origin' in response.headers
+        if response.status_code // 100 != 2:
+            return False
+
+        content_type = response.headers.get('Content-Type', '')
+
+        if 'application/json' in content_type:
+            try:
+                data = response.json()
+                if isinstance(data, (list, dict)):
+                    return True
+            except json.JSONDecodeError:
+                pass
+
+        elif 'application/xml' in content_type:
+            try:
+                tree = ET.fromstring(response.text)
+                if tree is not None:
+                    return True
+            except ET.ParseError:
+                pass
+
+        allow_header = response.headers.get('Allow', '')
+        if any(
+            verb in allow_header
+            for verb in ['GET', 'POST', 'PUT', 'PATCH', 'DELETE']
         ):
             return True
 
-        response_text = response.text
-        try:
-            parsed_json = json.loads(response_text)
-            if 'swagger' in parsed_json or 'openapi' in parsed_json:
-                return True
-        except json.JSONDecodeError:
-            pass
-
-        common_endpoints = ['/api', '/v1']
-        for endpoint in common_endpoints:
-            response = await client.get(url + endpoint)
-            if response.status_code in {200, 201}:
-                return True
-
     except httpx.HTTPError as e:
         print(f'An HTTP error occurred: {e}')
+    except json.JSONDecodeError:
+        print('Error decoding JSON response')
     except Exception as e:
-        print(f'An error occurred: {e}')
+        print(f'An unexpected error occurred: {e}')
 
     return False
 
@@ -71,15 +86,6 @@ async def check_swagger_rest(uri: str) -> dict:
         >>> asyncio.run(check_swagger_rest('http://127.0.0.1:8000')) # doctest: +SKIP
         {'status': 'success', 'message': 'Potential REST API documentation found at http://127.0.0.1:8000/', 'response': '{...}'}
     """
-    is_rest = await is_rest_api(uri)
-
-    if not is_rest:
-        return {
-            'status': 'error',
-            'message': f'{uri} does not appear to be a REST API.',
-            'response': [],
-        }
-
     async with httpx.AsyncClient(
         follow_redirects=True, headers={'User-Agent': 'API Checker'}
     ) as client:
@@ -98,6 +104,11 @@ async def check_swagger_rest(uri: str) -> dict:
         url = uri.rstrip('/')
 
         for endpoint in endpoints:
+            is_rest = await _is_rest_api(url + '/' + endpoint)
+
+            if not is_rest:
+                continue
+
             try:
                 response = await client.get(f'{url}/{endpoint}', timeout=10)
                 if response.status_code // 100 == 2:
@@ -136,7 +147,7 @@ async def check_swagger_rest(uri: str) -> dict:
 
         return {
             'status': 'error',
-            'message': 'No REST API documentation found.',
+            'message': 'No REST API documentation found.}',
             'response': list(_errors),
         }
 

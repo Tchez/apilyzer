@@ -68,7 +68,7 @@ apilyzer
 Esse comando retornará uma lista com os comandos disponíveis, que no momento são:
 
 ```bash
-apilyzer is-rest <url>
+apilyzer maturity <url>
 apilyzer verify-rest <url>
 ```
 
@@ -134,10 +134,10 @@ Acesse a documentação do projeto na seção [Documentação](#documentação) 
 
 ### Desenvolvedores
 
-#### Thiago Schuch
+#### Yan Sardinha
 
-[![GitHub](https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Thigschuch/)
-[![LinkedIn](https://img.shields.io/badge/linkedin-%230077B5.svg?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/thiago-schuch/)
+[![GitHub](https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=white)](https://github.com/YanSardinha/)
+[![LinkedIn](https://img.shields.io/badge/linkedin-%230077B5.svg?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/yan-sardinha/)
 
 
 ## Licença
