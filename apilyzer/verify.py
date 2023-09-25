@@ -141,6 +141,59 @@ async def check_swagger_rest(uri: str) -> dict:
         }
 
 
+async def _supports_https(uri: str) -> dict:
+    """Check if the given base URI of an API has support to HTTPS protocol.
+
+    Parameters:
+        uri (str): The base URI of the API.
+
+    Returns:
+        dict: A dictionary containing the 'status', 'message', and 'response' keys detailing the outcome of the check.
+
+    Examples:
+        >>> import asyncio
+        >>> asyncio.run(_supports_https('http://127.0.0.1:8000')) # doctest: +SKIP
+        {'status': 'success', 'message': 'The URI does not support HTTPS at http://127.0.0.1:8000/. ', 'response': '{...}'}
+    """
+
+    https_uri = (
+        uri.replace('http://', 'https://')
+        if uri.startswith('http://')
+        else uri
+    )
+
+    async with httpx.AsyncClient() as client:
+        _errors = set()
+        try:
+            response = await client.get(https_uri)
+            if response.status_code // 100 == 2:
+                if 'application/json' in response.headers.get(
+                    'Content-Type', ''
+                ):
+                    _response = response.json()
+                else:
+                    _response = response.text
+                return {
+                    'status': 'success',
+                    'message': 'The URI supports HTTPS at {uri}.',
+                    'response': _response,
+                }
+            else:
+                _errors.add(
+                    f'{response.status_code} Client Error: {response.reason_phrase} for URL: {https_uri}'
+                )
+        except httpx.RequestError as exc:
+            _errors.add(
+                f'An error occurred while requesting {https_uri}: {exc}'
+            )
+
+    return {
+        'status': 'error',
+        'message': 'The URI does not support HTTPS at {uri}.',
+        'response': list(_errors),
+    }
+
+
 async def _verify_maturity_paths(paths: dict) -> dict:
     """Verify the maturity level of the API's paths according to Richardson's maturity model.
 
@@ -264,10 +317,12 @@ async def analyze_api_maturity(uri: str) -> dict:
         }
 
     feedback = await _verify_maturity_paths(paths)
+    https = await _supports_https(uri)
 
     status = 'success' if feedback['messages'] else 'error'
 
     feedbacks['status'] = status
     feedbacks['feedback'] = feedback
+    feedbacks['https'] = https
 
     return feedbacks
