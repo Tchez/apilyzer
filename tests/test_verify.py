@@ -31,19 +31,24 @@ def test_is_rest_api_no_http():
 
 def test_check_swagger_rest_success_doc():
     result = asyncio.run(
-        check_swagger_rest('https://petstore.swagger.io/v2/swagger.json')
+        check_swagger_rest('https://petstore.swagger.io/v2', 'swagger.json')
     )
     assert result['status'] == 'success'
     assert (
-        'Potential REST API documentation found at https://petstore.swagger.io/v2/swagger.json'
+        'REST API JSON documentation found at https://petstore.swagger.io/v2/swagger.json'
         in result['message']
     )
+    assert 'swagger' in result['response'] or 'openapi' in result['response']
 
 
 def test_check_swagger_rest_no_doc():
     result = asyncio.run(check_swagger_rest('https://google.com'))
     assert result['status'] == 'error'
     assert 'No REST API documentation found.' in result['message']
+    assert (
+        '(Endpoint not specified, and we could not identify it with the base URL alone)'
+        in result['message']
+    )
 
 
 def test_check_swagger_rest_invalid_url():
@@ -51,6 +56,10 @@ def test_check_swagger_rest_invalid_url():
     result = asyncio.run(check_swagger_rest(invalid_url))
     assert result['status'] == 'error'
     assert 'No REST API documentation found.' in result['message']
+    assert (
+        '(Endpoint not specified, and we could not identify it with the base URL alone)'
+        in result['message']
+    )
 
 
 def test_analyze_api_maturity():
