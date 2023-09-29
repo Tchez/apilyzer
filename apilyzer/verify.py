@@ -4,8 +4,8 @@ import xml.etree.ElementTree as ET
 import httpx
 
 
-async def _is_rest_api(uri: str) -> bool:
-    """Verifies if the given URI belongs to a REST API.
+async def _is_rest_api(uri: str) -> (bool, httpx.Response):
+    """Verifies if the given URI belongs to a REST API and returns the response.
 
     This function sends a GET request to the URI and checks the response headers and content to determine whether it is a REST API.
     Currently, this function recognizes only APIs that return JSON or XML content.
@@ -15,6 +15,7 @@ async def _is_rest_api(uri: str) -> bool:
 
     Returns:
         bool: True if the API is REST, False otherwise.
+        httpx.Response: The response of the GET request.
 
     Raises:
         httpx.HTTPError: If there was an error making the request (handled within the function and reported to the console).
@@ -22,10 +23,10 @@ async def _is_rest_api(uri: str) -> bool:
     Examples:
         >>> import asyncio
         >>> asyncio.run(_is_rest_api('http://127.0.0.1:8000')) # doctest: +SKIP
-        True
+        True, <Response [200 OK]>
     """
-    if not uri.startswith('http') or not uri.startswith('https'):
-        return False
+    if not (uri.startswith('http') or uri.startswith('https')):
+        return False, None
 
     try:
         async with httpx.AsyncClient(
@@ -35,7 +36,7 @@ async def _is_rest_api(uri: str) -> bool:
             response = await client.get(url, timeout=10)
 
         if response.status_code // 100 != 2:
-            return False
+            return False, response
 
         content_type = response.headers.get('Content-Type', '')
 
@@ -43,7 +44,7 @@ async def _is_rest_api(uri: str) -> bool:
             try:
                 data = response.json()
                 if isinstance(data, (list, dict)):
-                    return True
+                    return True, response
             except json.JSONDecodeError:
                 pass
 
@@ -51,7 +52,7 @@ async def _is_rest_api(uri: str) -> bool:
             try:
                 tree = ET.fromstring(response.text)
                 if tree is not None:
-                    return True
+                    return True, response
             except ET.ParseError:
                 pass
 
@@ -60,16 +61,17 @@ async def _is_rest_api(uri: str) -> bool:
             verb in allow_header
             for verb in ['GET', 'POST', 'PUT', 'PATCH', 'DELETE']
         ):
-            return True
+            return True, response
 
     except httpx.HTTPError as e:
         print(f'An HTTP error occurred: {e}')
+        return False, None
     except json.JSONDecodeError:
         print('Error decoding JSON response')
     except Exception as e:
         print(f'An unexpected error occurred: {e}')
 
-    return False
+    return False, None
 
 
 async def check_swagger_rest(uri: str, doc_endpoint: str = None) -> dict:
@@ -116,44 +118,45 @@ async def check_swagger_rest(uri: str, doc_endpoint: str = None) -> dict:
             ]
 
         for endpoint in endpoints:
+            full_url = f'{url}/{endpoint}'
             try:
-                response = await client.get(f'{url}/{endpoint}', timeout=10)
+                is_rest, response = await _is_rest_api(full_url)
+
+                if not is_rest:
+                    _errors.add(
+                        f'The URL {full_url} does not seem to be a REST API.'
+                    )
+                    continue
+
                 if response.status_code // 100 != 2:
                     _errors.add(
                         f'{response.status_code} Client Error: {response.reason_phrase} for url: {response.url}'
                     )
                     continue
 
-                if 'application/json' in response.headers.get(
-                    'Content-Type', ''
-                ):
-                    _response = response.json()
-                    if any(
-                        term in str(_response).lower() for term in api_terms
+                if any(term in response.text.lower() for term in api_terms):
+                    if 'application/json' in response.headers.get(
+                        'Content-Type', ''
                     ):
-                        message = f'REST API JSON documentation found at {url}/{endpoint}'
-                        if not doc_endpoint:
-                            message += ' (Endpoint not specified, but we identified it)'
                         return {
                             'status': 'success',
-                            'message': message,
-                            'response': _response,
+                            'message': f'REST API JSON documentation found at {full_url}',
+                            'response': response.json(),
                         }
-                elif any(term in response.text.lower() for term in api_terms):
-                    message = f'Potential REST API documentation found at {url}/{endpoint}, but not in JSON format.'
-                    if not doc_endpoint:
-                        message += ' (Endpoint not specified, please provide the JSON documentation endpoint)'
-                    return {
-                        'status': 'warning',
-                        'message': message,
-                        'response': None,
-                    }
+                    else:
+                        message = f'Potential REST API documentation found at {full_url}, but not in JSON format.'
+                        if not doc_endpoint:
+                            message += ' (Endpoint not specified, please provide the JSON documentation endpoint)'
+                        return {
+                            'status': 'warning',
+                            'message': message,
+                            'response': None,
+                        }
 
-            except httpx.RequestError as exc:
+            except Exception as e:
                 _errors.add(
-                    f'An error occurred while requesting {url}/{endpoint}: {exc}'
+                    f'An error occurred while requesting {full_url}: {e}'
                 )
-                continue
 
         message = 'No REST API documentation found.'
 
