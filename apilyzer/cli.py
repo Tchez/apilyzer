@@ -3,7 +3,12 @@ import asyncio
 from rich.console import Console
 from typer import Argument, Context, Typer
 
-from apilyzer.verify import analyze_api_maturity, check_swagger_rest
+from apilyzer.verify import (
+    _is_rest_api,
+    analyze_api_maturity,
+    check_swagger_rest,
+    estimate_rate_limit,
+)
 
 console = Console()
 app = Typer()
@@ -56,6 +61,19 @@ def maturity(
     ),
 ):
     result = asyncio.run(analyze_api_maturity(url))
+    console.print(result)
+
+
+@app.command()
+def test_rate(
+    url: str = Argument(
+        'http://127.0.0.1:8000', help='URL of the API to verify.'
+    ),
+    rate: int = Argument(
+        '50', help='Number of requests to test if the API is able to resist.'
+    ),
+):
+    result = asyncio.run(estimate_rate_limit(url, rate))
     console.print(result)
 
 

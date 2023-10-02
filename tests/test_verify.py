@@ -5,6 +5,7 @@ from apilyzer.verify import (
     _supports_https,
     analyze_api_maturity,
     check_swagger_rest,
+    estimate_rate_limit,
 )
 
 
@@ -76,15 +77,17 @@ def test_analyze_api_maturity_invalid_url():
     assert 'No REST API documentation found.' in result['message']
 
 
-def test_supports_https_success():
-    result = asyncio.run(
-        _supports_https('https://nv-research-tlv.netlify.app/')
-    )
+def test_estimate_rate_limit_success():
+    api_url = 'https://petstore.swagger.io/v2/pet/1'
+    max_requests = 100
+    result = asyncio.run(estimate_rate_limit(api_url, max_requests))
     assert result['status'] == 'success'
-    assert 'URI supports HTTPS' in result['message']
+    assert 'requisições foram bem-sucedidas sem erros 429' in result['message']
 
 
-def test_supports_https_failure():
-    result = asyncio.run(_supports_https('https://petstore.swagger.io/v2'))
+def test_estimate_rate_limit_request_error():
+    api_url = 'https://api-with-request-error.com'
+    max_requests = 100
+    result = asyncio.run(estimate_rate_limit(api_url, max_requests))
     assert result['status'] == 'error'
-    assert 'URI does not support HTTPS' in result['message']
+    assert 'Ocorreu um erro ao solicitar' in result['message']

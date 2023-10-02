@@ -1,3 +1,4 @@
+import asyncio
 import json
 import xml.etree.ElementTree as ET
 
@@ -352,3 +353,52 @@ async def analyze_api_maturity(uri: str) -> dict:
     feedbacks['https'] = https
 
     return feedbacks
+
+
+async def estimate_rate_limit(uri: str, max_requests: int):
+    """Analyze the rate limit of a REST API using multiple requests in parallel.
+
+    Parameters:
+        uri (str): The base URI of the API.
+        max_requests (int): The max quantity of requests the users want to test.
+
+    Returns:
+        dict: A dictionary containing feedback on how the API was able to support multiple parallel requests.
+    """
+
+    async def make_request(session, uri):
+        try:
+            response = await session.get(uri)
+            if response.status_code == 429:
+                return {
+                    'status': 'error',
+                    'message': f'A API retornou um erro 429 (Too Many Requests). Isso indica que o limite de taxa da API foi excedido.',
+                    'response_code': response.status_code,
+                }
+            return {
+                'status': 'success',
+                'message': 'Requisição bem-sucedida.',
+                'response_code': response.status_code,
+            }
+        except httpx.RequestError as exc:
+            return {
+                'status': 'error',
+                'message': f'Ocorreu um erro ao solicitar {uri}: {exc}',
+                'response_code': None,
+            }
+
+    async with httpx.AsyncClient() as client:
+        tasks = []
+        for _ in range(max_requests):
+            tasks.append(make_request(client, uri))
+        results = await asyncio.gather(*tasks)
+
+        for result in results:
+            if result['status'] == 'error':
+                return result
+
+    return {
+        'status': 'success',
+        'message': f'Todas as {max_requests} requisições foram bem-sucedidas sem erros 429. Isso sugere que a API pode suportar a quantidade especificada de requisições.',
+        'response_code': None,
+    }
