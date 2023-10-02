@@ -10,24 +10,35 @@ from apilyzer.verify import (
 
 
 def test_is_rest_api_true():
-    assert (
-        asyncio.run(
-            _is_rest_api('https://petstore.swagger.io/v2/swagger.json')
-        )
-        is True
+    is_rest, response = asyncio.run(
+        _is_rest_api('https://petstore.swagger.io/v2/swagger.json')
     )
+
+    assert is_rest is True
+    assert response is not None
 
 
 def test_is_rest_api_false():
-    assert asyncio.run(_is_rest_api('https://google.com')) is False
+    is_rest, response = asyncio.run(_is_rest_api('https://google.com'))
+
+    assert is_rest is False
+    assert response is None
 
 
 def test_url_is_rest_api_invalid():
-    assert asyncio.run(_is_rest_api('https://invalid_url')) is False
+    is_rest, response = asyncio.run(_is_rest_api('https://invalid_url'))
+
+    assert is_rest is False
+    assert response is None
 
 
 def test_is_rest_api_no_http():
-    assert asyncio.run(_is_rest_api('petstore.swagger.io/v2/swagger')) is False
+    is_rest, response = asyncio.run(
+        _is_rest_api('petstore.swagger.io/v2/swagger')
+    )
+
+    assert is_rest is False
+    assert response is None
 
 
 def test_check_swagger_rest_success_doc():
