@@ -26,15 +26,18 @@ Atualmente, existem 2 subcomandos disponíveis para essa aplicação:
 
 - [b]verify-rest[/]: Verifica se uma API REST está documentada com base na URL fornecida e caso esteja, retorna o retorno da API
 - [b]maturity[/]: Analisa o nível de maturidade de uma API REST com base no modelo de maturidade de Richardson
+- [b]test_rate[/]: Efetua uma quantidade de requisições (100 por padrão) para a API com o objetivo de validar se a API tem um limite para a quantidade de requisições
 
 [b]Exemplos de uso:[/]
 
 [green]apilyzer verify-rest [/]
 [green]apilyzer maturity [/]
+[green]apilyzer test_rate [/]
 
 
 [green]apilyzer verify-rest https://petstore.swagger.io v2/swagger[/]
 [green]apilyzer maturity https://picpay.github.io/picpay-docs-digital-payments/swagger/checkout.json[/]
+[green]apilyzer test_rate https://petstore.swagger.io/v2/pet[/]
 
 
 [b]Para mais informações: [yellow]apilyzer --help[/]

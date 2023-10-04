@@ -350,6 +350,11 @@ async def estimate_rate_limit(uri: str, max_requests: int):
 
     Returns:
         dict: A dictionary containing feedback on how the API was able to support multiple parallel requests.
+
+    Examples:
+        >>> import asyncio
+        >>> asyncio.run(estimate_rate_limit('http://127.0.0.1:8000', 100)) # doctest: +SKIP
+        {'status': 'success', 'message': 'The API returned a 429 error (too many requests). This indicates that the rate limit has been exceeded', 'response': '{...}'}
     """
 
     async def make_request(session, uri):
