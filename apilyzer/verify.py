@@ -358,18 +358,18 @@ async def estimate_rate_limit(uri: str, max_requests: int):
             if response.status_code == 429:
                 return {
                     'status': 'error',
-                    'message': f'A API retornou um erro 429 (Too Many Requests). Isso indica que o limite de taxa da API foi excedido.',
+                    'message': f'The API returned a 429 error (too many requests). This indicates that the rate limit has been exceeded',
                     'response_code': response.status_code,
                 }
             return {
                 'status': 'success',
-                'message': 'Requisição bem-sucedida.',
+                'message': 'All requests were successful',
                 'response_code': response.status_code,
             }
         except httpx.RequestError as exc:
             return {
                 'status': 'error',
-                'message': f'Ocorreu um erro ao solicitar {uri}: {exc}',
+                'message': f'An error occurred while requesting {uri}: {exc}',
                 'response_code': None,
             }
 
@@ -385,6 +385,6 @@ async def estimate_rate_limit(uri: str, max_requests: int):
 
     return {
         'status': 'success',
-        'message': f'Todas as {max_requests} requisições foram bem-sucedidas sem erros 429. Isso sugere que a API pode suportar a quantidade especificada de requisições.',
+        'message': f'All of {max_requests} requests were successful without 429 errors. This suggests that the API can support the specified number of requests',
         'response_code': None,
     }

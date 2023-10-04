@@ -4,7 +4,7 @@ from rich.console import Console
 from typer import Argument, Context, Typer
 
 from apilyzer.verify import (
-    _is_rest_api,
+    _is_json_rest_api,
     analyze_api_maturity,
     check_swagger_rest,
     estimate_rate_limit,
