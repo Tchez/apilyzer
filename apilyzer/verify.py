@@ -1,5 +1,4 @@
 import json
-import xml.etree.ElementTree as ET
 
 import httpx
 
@@ -72,85 +71,82 @@ async def check_swagger_rest(uri: str, doc_endpoint: str = None) -> dict:
         >>> asyncio.run(check_swagger_rest('http://127.0.0.1:8000')) # doctest: +SKIP
         {'status': 'success', 'message': 'REST API JSON documentation found at http://127.0.0.1:8000/', 'response': '{...}'}
     """
-    async with httpx.AsyncClient(
-        follow_redirects=True, headers={'User-Agent': 'API Checker'}
-    ) as client:
-        _errors = set()
-        url = uri.rstrip('/')
-        api_terms = [
+    _errors = set()
+    url = uri.rstrip('/')
+
+    api_terms = [
+        'swagger',
+        'openapi',
+        'endpoints',
+        'paths',
+        'documentation',
+    ]
+
+    if doc_endpoint:
+        doc_endpoint = doc_endpoint.lstrip('/')
+        endpoints = [doc_endpoint]
+    else:
+        endpoints = [
+            'openapi.json',
+            'swagger.json',
+            'docs',
+            'api-docs',
             'swagger',
-            'openapi',
-            'endpoints',
-            'paths',
-            'documentation',
+            'redoc',
+            'api/docs',
+            'swagger/ui',
+            '',
         ]
 
-        if doc_endpoint:
-            endpoints = [doc_endpoint]
-        else:
-            endpoints = [
-                'openapi.json',
-                'swagger.json',
-                'docs',
-                'api-docs',
-                'swagger',
-                'redoc',
-                'api/docs',
-                'swagger/ui',
-                '',
-            ]
+    for endpoint in endpoints:
+        full_url = f'{url}/{endpoint}'
+        try:
+            is_rest, response = await _is_json_rest_api(full_url)
 
-        for endpoint in endpoints:
-            full_url = f'{url}/{endpoint}'
-            try:
-                is_rest, response = await _is_json_rest_api(full_url)
-
-                if not is_rest:
-                    _errors.add(
-                        f'The URL {full_url} does not seem to be a REST API'
-                    )
-                    continue
-
-                if response.status_code // 100 != 2:
-                    _errors.add(
-                        f'{response.status_code} Client Error: {response.reason_phrase} for url: {response.url}'
-                    )
-                    continue
-
-                if any(term in response.text.lower() for term in api_terms):
-                    if 'application/json' in response.headers.get(
-                        'Content-Type', ''
-                    ):
-                        return {
-                            'status': 'success',
-                            'message': f'REST API JSON documentation found at {full_url}',
-                            'response': response.json(),
-                        }
-                    else:
-                        message = f'Potential REST API documentation found at {full_url}, but not in JSON format'
-                        if not doc_endpoint:
-                            message += ' (Endpoint not specified, please provide the JSON documentation endpoint)'
-                        return {
-                            'status': 'warning',
-                            'message': message,
-                            'response': None,
-                        }
-
-            except Exception as e:
+            if not is_rest:
                 _errors.add(
-                    f'An error occurred while requesting {full_url}: {e}'
+                    f'The URL {full_url} does not seem to be a JSON REST API'
                 )
+                continue
 
-        message = 'No REST API documentation found'
+            if response.status_code // 100 != 2:
+                _errors.add(
+                    f'{response.status_code} Client Error: {response.reason_phrase} for url: {response.url}'
+                )
+                continue
 
-        if not doc_endpoint:
-            message += ' (Endpoint not specified, and we could not identify it with the base URL alone)'
+            if any(term in response.text.lower() for term in api_terms):
+                if 'application/json' in response.headers.get(
+                    'Content-Type', ''
+                ):
+                    return {
+                        'status': 'success',
+                        'message': f'REST API JSON documentation found at {full_url}',
+                        'response': response.json(),
+                    }
+                else:
+                    message = f'Potential REST API documentation found at {full_url}, but not in JSON format'
+                    if not doc_endpoint:
+                        message += ' (Endpoint not specified, please provide the JSON documentation endpoint)'
+                    return {
+                        'status': 'warning',
+                        'message': message,
+                        'response': None,
+                    }
 
-        return {
-            'status': 'error',
-            'message': message,
-            'response': list(_errors),
-        }
+        except Exception as e:
+            _errors.add(f'An error occurred while requesting {full_url}: {e}')
+
+    message = 'No REST API documentation found'
+
+    if not doc_endpoint:
+        message += ' (Endpoint not specified, and we could not identify it with the base URL alone)'
+
+    return {
+        'status': 'error',
+        'message': message,
+        'response': list(_errors),
+    }
 
 
 async def _supports_https(uri: str) -> dict:
