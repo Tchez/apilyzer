@@ -1,43 +1,56 @@
 import asyncio
 
 from apilyzer.verify import (
-    _is_rest_api,
+    _is_json_rest_api,
     _supports_https,
     analyze_api_maturity,
     check_swagger_rest,
 )
 
 
-def test_is_rest_api_true():
+def test_is_json_rest_api_true():
     is_rest, response = asyncio.run(
-        _is_rest_api('https://petstore.swagger.io/v2/swagger.json')
+        _is_json_rest_api(
+            'https://picpay.github.io/picpay-docs-digital-payments/swagger/checkout.json'
+        )
     )
 
     assert is_rest is True
     assert response is not None
 
 
-def test_is_rest_api_false():
-    is_rest, response = asyncio.run(_is_rest_api('https://google.com'))
+def test_is_json_rest_api_false():
+    is_rest, response = asyncio.run(_is_json_rest_api('http://google.com'))
+
+    assert is_rest is False
+    assert response.status_code == 200
+    assert 'text/html' in response.headers['content-type']
+
+
+def test_url_is_json_rest_api_invalid():
+    is_rest, response = asyncio.run(_is_json_rest_api('https://invalid_url'))
 
     assert is_rest is False
     assert response is None
 
 
-def test_url_is_rest_api_invalid():
-    is_rest, response = asyncio.run(_is_rest_api('https://invalid_url'))
-
-    assert is_rest is False
-    assert response is None
-
-
-def test_is_rest_api_no_http():
+def test_is_json_rest_api_no_http():
     is_rest, response = asyncio.run(
-        _is_rest_api('petstore.swagger.io/v2/swagger')
+        _is_json_rest_api('petstore.swagger.io/v2/swagger')
     )
 
     assert is_rest is False
     assert response is None
+
+
+def test_is_json_rest_api_no_json():
+    is_rest, response = asyncio.run(
+        _is_json_rest_api('http://rss.cnn.com/rss/cnn_topstories.rss')
+    )
+
+    assert is_rest is False
+    assert response.status_code == 200
+    assert 'text/xml' in response.headers['content-type']
 
 
 def test_check_swagger_rest_success_doc():
@@ -55,7 +68,7 @@ def test_check_swagger_rest_success_doc():
 def test_check_swagger_rest_no_doc():
     result = asyncio.run(check_swagger_rest('https://google.com'))
     assert result['status'] == 'error'
-    assert 'No REST API documentation found.' in result['message']
+    assert 'No REST API documentation found' in result['message']
     assert (
         '(Endpoint not specified, and we could not identify it with the base URL alone)'
         in result['message']
@@ -66,7 +79,7 @@ def test_check_swagger_rest_invalid_url():
     invalid_url = 'https://invalid_url.com'
     result = asyncio.run(check_swagger_rest(invalid_url))
     assert result['status'] == 'error'
-    assert 'No REST API documentation found.' in result['message']
+    assert 'No REST API documentation found' in result['message']
     assert (
         '(Endpoint not specified, and we could not identify it with the base URL alone)'
         in result['message']
@@ -84,7 +97,7 @@ def test_analyze_api_maturity():
 def test_analyze_api_maturity_invalid_url():
     result = asyncio.run(analyze_api_maturity('https://invalid_url'))
     assert result['status'] == 'error'
-    assert 'No REST API documentation found.' in result['message']
+    assert 'No REST API documentation found' in result['message']
 
 
 def test_supports_https_success():

@@ -4,25 +4,25 @@ import xml.etree.ElementTree as ET
 import httpx
 
 
-async def _is_rest_api(uri: str) -> (bool, httpx.Response):
-    """Verifies if the given URI belongs to a REST API and returns the response.
+async def _is_json_rest_api(uri: str) -> (bool, httpx.Response):
+    """Verifies if the given URI belongs to a JSON REST API and returns the response.
 
     This function sends a GET request to the URI and checks the response headers and content to determine whether it is a REST API.
-    Currently, this function recognizes only APIs that return JSON or XML content.
+    Currently, this function recognizes only APIs that return JSON content.
 
     Parameters:
         uri (str): The URI to be checked.
 
     Returns:
-        bool: True if the API is REST, False otherwise.
+        bool: True if the API is JSON REST, False otherwise.
         httpx.Response: The response of the GET request.
 
     Raises:
-        httpx.HTTPError: If there was an error making the request (handled within the function and reported to the console).
+        httpx.HTTPError: If there was an error making the request (handled within the function).
 
     Examples:
         >>> import asyncio
-        >>> asyncio.run(_is_rest_api('http://127.0.0.1:8000')) # doctest: +SKIP
+        >>> asyncio.run(_is_json_rest_api('http://127.0.0.1:8000')) # doctest: +SKIP
         True, <Response [200 OK]>
     """
     if not (uri.startswith('http') or uri.startswith('https')):
@@ -32,46 +32,29 @@ async def _is_rest_api(uri: str) -> (bool, httpx.Response):
         async with httpx.AsyncClient(
             follow_redirects=True, headers={'User-Agent': 'API Checker'}
         ) as client:
-            url = uri.rstrip('/') + '/'
+            url = uri.rstrip('/')
             response = await client.get(url, timeout=10)
+    except httpx.ConnectError:
+        return False, None
 
-        if response.status_code // 100 != 2:
-            return False, response
+    if response.status_code // 100 != 2:
+        return False, response
 
-        content_type = response.headers.get('Content-Type', '')
+    content_type = response.headers.get('Content-Type', '')
 
-        if 'application/json' in content_type:
-            try:
-                data = response.json()
-                if isinstance(data, (list, dict)):
-                    return True, response
-            except json.JSONDecodeError:
-                pass
-
-        elif 'application/xml' in content_type:
-            try:
-                tree = ET.fromstring(response.text)
-                if tree is not None:
-                    return True, response
-            except ET.ParseError:
-                pass
-
-        allow_header = response.headers.get('Allow', '')
-        if any(
-            verb in allow_header
-            for verb in ['GET', 'POST', 'PUT', 'PATCH', 'DELETE']
-        ):
+    if 'application/json' in content_type:
+        data = response.json()
+        if isinstance(data, (list, dict)):
             return True, response
 
-    except httpx.HTTPError as e:
-        print(f'An HTTP error occurred: {e}')
-        return False, None
-    except json.JSONDecodeError:
-        print('Error decoding JSON response')
-    except Exception as e:
-        print(f'An unexpected error occurred: {e}')
+    allow_header = response.headers.get('Allow', '')
+    if any(
+        verb in allow_header
+        for verb in ['GET', 'POST', 'PUT', 'PATCH', 'DELETE']
+    ):
+        return True, response
 
-    return False, None
+    return False, response
 
 
 async def check_swagger_rest(uri: str, doc_endpoint: str = None) -> dict:
@@ -120,11 +103,11 @@ async def check_swagger_rest(uri: str, doc_endpoint: str = None) -> dict:
         for endpoint in endpoints:
             full_url = f'{url}/{endpoint}'
             try:
-                is_rest, response = await _is_rest_api(full_url)
+                is_rest, response = await _is_json_rest_api(full_url)
 
                 if not is_rest:
                     _errors.add(
-                        f'The URL {full_url} does not seem to be a REST API.'
+                        f'The URL {full_url} does not seem to be a REST API'
                     )
                     continue
 
@@ -144,7 +127,7 @@ async def check_swagger_rest(uri: str, doc_endpoint: str = None) -> dict:
                             'response': response.json(),
                         }
                     else:
-                        message = f'Potential REST API documentation found at {full_url}, but not in JSON format.'
+                        message = f'Potential REST API documentation found at {full_url}, but not in JSON format'
                         if not doc_endpoint:
                             message += ' (Endpoint not specified, please provide the JSON documentation endpoint)'
                         return {
@@ -158,7 +141,7 @@ async def check_swagger_rest(uri: str, doc_endpoint: str = None) -> dict:
                     f'An error occurred while requesting {full_url}: {e}'
                 )
 
-        message = 'No REST API documentation found.'
+        message = 'No REST API documentation found'
 
         if not doc_endpoint:
             message += ' (Endpoint not specified, and we could not identify it with the base URL alone)'
@@ -182,7 +165,7 @@ async def _supports_https(uri: str) -> dict:
     Examples:
         >>> import asyncio
         >>> asyncio.run(_supports_https('http://127.0.0.1:8000')) # doctest: +SKIP
-        {'status': 'success', 'message': 'The URI does not support HTTPS at http://127.0.0.1:8000/. ', 'response': '{...}'}
+        {'status': 'success', 'message': '✅ The URI does not support HTTPS at http://127.0.0.1:8000/. ', 'response': '{...}'}
     """
 
     https_uri = (
@@ -204,7 +187,7 @@ async def _supports_https(uri: str) -> dict:
                     _response = response.text
                 return {
                     'status': 'success',
-                    'message': 'The URI supports HTTPS at {uri}.',
+                    'message': f'✅ The URI supports HTTPS at {uri}',
                     'response': _response,
                 }
             else:
@@ -218,7 +201,7 @@ async def _supports_https(uri: str) -> dict:
 
     return {
         'status': 'error',
-        'message': 'The URI does not support HTTPS at {uri}.',
+        'message': f'🚫 The URI does not support HTTPS at {uri}',
         'response': list(_errors),
     }
 
@@ -242,7 +225,7 @@ async def _verify_maturity_paths(paths: dict) -> dict:
             if method not in valid_methods:
                 messages.append(
                     f'🚫   Error! The {path} method uses a non-conventional {method.upper()} method. '
-                    f'Consider following the standard RESTful methods for better maturity.'
+                    f'Consider following the standard RESTful methods for better maturity'
                 )
 
         if 'get' in path_info:
@@ -272,10 +255,10 @@ async def _verify_maturity_paths(paths: dict) -> dict:
                 if actual_status == expected_status:
                     if actual_description != expected_description:
                         messages.append(
-                            f'✅   Congratulations! The {path} method returns the correct status code for {method.upper()} requests.'
+                            f'✅   Congratulations! The {path} method returns the correct status code for {method.upper()} requests'
                         )
                         messages.append(
-                            f'⚠️   Warning! Richardson\'s maturity model recommends using "{expected_description}" as the description for {method.upper()} requests.'
+                            f'⚠️   Warning! Richardson\'s maturity model recommends using "{expected_description}" as the description for {method.upper()} requests'
                         )
                     else:
                         messages.append(
@@ -331,7 +314,7 @@ async def analyze_api_maturity(uri: str) -> dict:
         except json.JSONDecodeError:
             return {
                 'status': 'error',
-                'message': f'The API is documented, but the documentation is not valid JSON. Please check the documentation at {uri}.',
+                'message': f'The API is documented, but the documentation is not valid JSON. Please check the documentation at {uri}',
                 'check_swagger_response': swagger_doc,
             }
 
@@ -341,7 +324,7 @@ async def analyze_api_maturity(uri: str) -> dict:
     except AttributeError:
         return {
             'status': 'error',
-            'message': 'The API is documented, but no paths were found.',
+            'message': 'The API is documented, but no paths were found',
             'check_swagger_response': swagger_doc,
         }
 
@@ -351,7 +334,7 @@ async def analyze_api_maturity(uri: str) -> dict:
     status = 'success' if feedback['messages'] else 'error'
 
     feedbacks['status'] = status
+    feedbacks['https'] = https['message']
     feedbacks['feedback'] = feedback
-    feedbacks['https'] = https
 
     return feedbacks
