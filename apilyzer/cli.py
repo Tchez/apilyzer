@@ -33,8 +33,8 @@ Atualmente, existem 2 subcomandos disponíveis para essa aplicação:
 [green]apilyzer maturity [/]
 
 
-[green]apilyzer verify-rest https://petstore.swagger.io/v2/swagger[/]
-[green]apilyzer maturity https://petstore.swagger.io/v2/swagger[/]
+[green]apilyzer verify-rest https://petstore.swagger.io v2/swagger[/]
+[green]apilyzer maturity https://picpay.github.io/picpay-docs-digital-payments/swagger/checkout.json[/]
 
 
 [b]Para mais informações: [yellow]apilyzer --help[/]
@@ -47,17 +47,21 @@ Atualmente, existem 2 subcomandos disponíveis para essa aplicação:
 @app.command()
 def verify_rest(
     url: str = Argument(
-        'http://127.0.0.1:8000', help='URL of the API to verify.'
+        'http://127.0.0.1:8000', help='URL of the API to verify'
+    ),
+    endpoint: str = Argument(
+        None,
+        help='Endpoint of the API to verify. If not provided, we will try to identify it with the base URL alone',
     ),
 ):
-    result = asyncio.run(check_swagger_rest(url))
+    result = asyncio.run(check_swagger_rest(url, endpoint))
     console.print(result)
 
 
 @app.command()
 def maturity(
     url: str = Argument(
-        'http://127.0.0.1:8000', help='URL of the API to verify.'
+        'http://127.0.0.1:8000', help='URL of the API to verify'
     ),
 ):
     result = asyncio.run(analyze_api_maturity(url))
