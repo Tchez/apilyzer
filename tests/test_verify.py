@@ -5,6 +5,7 @@ from apilyzer.verify import (
     _supports_https,
     analyze_api_maturity,
     check_swagger_rest,
+    estimate_rate_limit,
 )
 
 
@@ -112,3 +113,19 @@ def test_supports_https_failure():
     result = asyncio.run(_supports_https('https://petstore.swagger.io/v2'))
     assert result['status'] == 'error'
     assert 'URI does not support HTTPS' in result['message']
+
+
+def test_estimate_rate_limit_success():
+    api_url = 'https://petstore.swagger.io/v2/pet/1'
+    max_requests = 100
+    result = asyncio.run(estimate_rate_limit(api_url, max_requests))
+    assert result['status'] == 'success'
+    assert 'requests were successful without 429 errors' in result['message']
+
+
+def test_estimate_rate_limit_request_error():
+    api_url = 'https://api-with-request-error.com'
+    max_requests = 100
+    result = asyncio.run(estimate_rate_limit(api_url, max_requests))
+    assert result['status'] == 'error'
+    assert 'An error occurred while requesting' in result['message']

@@ -1,3 +1,4 @@
+import asyncio
 import json
 
 import httpx
@@ -334,3 +335,57 @@ async def analyze_api_maturity(uri: str) -> dict:
     feedbacks['feedback'] = feedback
 
     return feedbacks
+
+
+async def estimate_rate_limit(uri: str, max_requests: int):
+    """Analyze the rate limit of a REST API using multiple requests in parallel.
+
+    Parameters:
+        uri (str): The base URI of the API.
+        max_requests (int): The max quantity of requests the users want to test.
+
+    Returns:
+        dict: A dictionary containing feedback on how the API was able to support multiple parallel requests.
+
+    Examples:
+        >>> import asyncio
+        >>> asyncio.run(estimate_rate_limit('http://127.0.0.1:8000', 100)) # doctest: +SKIP
+        {'status': 'success', 'message': 'The API returned a 429 error (too many requests). This indicates that the rate limit has been exceeded', 'response': '{...}'}
+    """
+
+    async def make_request(session, uri):
+        try:
+            response = await session.get(uri)
+            if response.status_code == 429:
+                return {
+                    'status': 'error',
+                    'message': f'The API returned a 429 error (too many requests). This indicates that the rate limit has been exceeded',
+                    'response_code': response.status_code,
+                }
+            return {
+                'status': 'success',
+                'message': 'All requests were successful',
+                'response_code': response.status_code,
+            }
+        except httpx.RequestError as exc:
+            return {
+                'status': 'error',
+                'message': f'An error occurred while requesting {uri}: {exc}',
+                'response_code': None,
+            }
+
+    async with httpx.AsyncClient() as client:
+        tasks = []
+        for _ in range(max_requests):
+            tasks.append(make_request(client, uri))
+        results = await asyncio.gather(*tasks)
+
+        for result in results:
+            if result['status'] == 'error':
+                return result
+
+    return {
+        'status': 'success',
+        'message': f'All of {max_requests} requests were successful without 429 errors. This suggests that the API can support the specified number of requests',
+        'response_code': None,
+    }
