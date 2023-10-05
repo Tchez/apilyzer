@@ -11,7 +11,7 @@ def test_cli_returns_success():
     assert result.exit_code == 0
 
 
-@mark.parametrize('command', ['is-rest', 'verify-rest'])
+@mark.parametrize('command', ['maturity', 'verify-rest'])
 def test_cli_subcommands_return_success(command):
     result = runner.invoke(app, [command])
     assert result.exit_code == 0

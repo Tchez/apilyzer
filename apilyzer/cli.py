@@ -4,9 +4,10 @@ from rich.console import Console
 from typer import Argument, Context, Typer
 
 from apilyzer.verify import (
+    _is_json_rest_api,
     analyze_api_maturity,
     check_swagger_rest,
-    is_rest_api,
+    estimate_rate_limit,
 )
 
 console = Console()
@@ -21,21 +22,22 @@ def main(
 
 Forma de uso: [green]apilyzer [SUBCOMANDO] [ARGUMENTOS][/]
 
-Atualmente, existem 3 subcomandos disponíveis para essa aplicação:
+Atualmente, existem 2 subcomandos disponíveis para essa aplicação:
 
-- [b]is-rest[/]: Verifica se uma URL pertece a uma API REST
 - [b]verify-rest[/]: Verifica se uma API REST está documentada com base na URL fornecida e caso esteja, retorna o retorno da API
 - [b]maturity[/]: Analisa o nível de maturidade de uma API REST com base no modelo de maturidade de Richardson
+- [b]test-rate[/]: Efetua uma quantidade de requisições (100 por padrão) para a API com o objetivo de validar se a API tem um limite para a quantidade de requisições
 
 [b]Exemplos de uso:[/]
 
-[green]apilyzer is-rest [/]
 [green]apilyzer verify-rest [/]
 [green]apilyzer maturity [/]
+[green]apilyzer test-rate [/]
 
 
-[green]apilyzer verify-rest https://petstore.swagger.io/v2[/]
-[green]apilyzer maturity https://petstore.swagger.io/v2[/]
+[green]apilyzer verify-rest https://petstore.swagger.io v2/swagger[/]
+[green]apilyzer maturity https://picpay.github.io/picpay-docs-digital-payments/swagger/checkout.json[/]
+[green]apilyzer test-rate https://petstore.swagger.io/v2/pet[/]
 
 
 [b]Para mais informações: [yellow]apilyzer --help[/]
@@ -46,32 +48,39 @@ Atualmente, existem 3 subcomandos disponíveis para essa aplicação:
 
 
 @app.command()
-def is_rest(
-    url: str = Argument(
-        'http://127.0.0.1:8000', help='URL of the API to verify.'
-    ),
-):
-    result = asyncio.run(is_rest_api(url))
-    console.print(result)
-
-
-@app.command()
 def verify_rest(
     url: str = Argument(
-        'http://127.0.0.1:8000', help='URL of the API to verify.'
+        'http://127.0.0.1:8000', help='URL of the API to verify'
+    ),
+    endpoint: str = Argument(
+        None,
+        help='Endpoint of the API to verify. If not provided, we will try to identify it with the base URL alone',
     ),
 ):
-    result = asyncio.run(check_swagger_rest(url))
+    result = asyncio.run(check_swagger_rest(url, endpoint))
     console.print(result)
 
 
 @app.command()
 def maturity(
     url: str = Argument(
-        'http://127.0.0.1:8000', help='URL of the API to verify.'
+        'http://127.0.0.1:8000', help='URL of the API to verify'
     ),
 ):
     result = asyncio.run(analyze_api_maturity(url))
+    console.print(result)
+
+
+@app.command()
+def test_rate(
+    url: str = Argument(
+        'http://127.0.0.1:8000', help='URL of the API to verify.'
+    ),
+    rate: int = Argument(
+        '50', help='Number of requests to test if the API is able to resist.'
+    ),
+):
+    result = asyncio.run(estimate_rate_limit(url, rate))
     console.print(result)
 
 
