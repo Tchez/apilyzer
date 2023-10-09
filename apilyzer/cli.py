@@ -6,7 +6,7 @@ from typer import Argument, Context, Typer
 from apilyzer.verify import (
     _is_json_rest_api,
     analyze_api_maturity,
-    check_swagger_rest,
+    check_documentation_json,
     estimate_rate_limit,
 )
 
@@ -57,7 +57,7 @@ def verify_rest(
         help='Endpoint of the API to verify. If not provided, we will try to identify it with the base URL alone',
     ),
 ):
-    result = asyncio.run(check_swagger_rest(url, endpoint))
+    result = asyncio.run(check_documentation_json(url, endpoint))
     console.print(result)
 
 

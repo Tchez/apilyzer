@@ -4,7 +4,7 @@ from apilyzer.verify import (
     _is_json_rest_api,
     _supports_https,
     analyze_api_maturity,
-    check_swagger_rest,
+    check_documentation_json,
     estimate_rate_limit,
 )
 
@@ -54,9 +54,9 @@ def test_is_json_rest_api_no_json():
     assert 'text/xml' in response.headers['content-type']
 
 
-def test_check_swagger_rest_success_doc():
+def test_check_documentation_json_success_doc():
     result = asyncio.run(
-        check_swagger_rest('https://petstore.swagger.io/v2', 'swagger.json')
+        check_documentation_json('https://petstore.swagger.io/v2', 'swagger.json')
     )
     assert result['status'] == 'success'
     assert (
@@ -66,8 +66,8 @@ def test_check_swagger_rest_success_doc():
     assert 'swagger' in result['response'] or 'openapi' in result['response']
 
 
-def test_check_swagger_rest_no_doc():
-    result = asyncio.run(check_swagger_rest('https://google.com'))
+def test_check_documentation_json_no_doc():
+    result = asyncio.run(check_documentation_json('https://google.com'))
     assert result['status'] == 'error'
     assert 'No REST API documentation found' in result['message']
     assert (
@@ -76,9 +76,9 @@ def test_check_swagger_rest_no_doc():
     )
 
 
-def test_check_swagger_rest_invalid_url():
+def test_check_documentation_json_invalid_url():
     invalid_url = 'https://invalid_url.com'
-    result = asyncio.run(check_swagger_rest(invalid_url))
+    result = asyncio.run(check_documentation_json(invalid_url))
     assert result['status'] == 'error'
     assert 'No REST API documentation found' in result['message']
     assert (

@@ -57,8 +57,8 @@ async def _is_json_rest_api(uri: str) -> (bool, httpx.Response):
     return False, response
 
 
-async def check_swagger_rest(uri: str, doc_endpoint: str = None) -> dict:
-    """Check if the given base URI of an API has REST API documentation available.
+async def check_documentation_json(uri: str, doc_endpoint: str = None) -> dict:
+    """Check if the given base URI of an API has REST API documentation available. If the documentation endpoint is not specified, the function will try to identify it.
 
     Parameters:
         uri (str): The base URI of the API.
@@ -69,7 +69,7 @@ async def check_swagger_rest(uri: str, doc_endpoint: str = None) -> dict:
 
     Examples:
         >>> import asyncio
-        >>> asyncio.run(check_swagger_rest('http://127.0.0.1:8000')) # doctest: +SKIP
+        >>> asyncio.run(check_documentation_json('http://127.0.0.1:8000')) # doctest: +SKIP
         {'status': 'success', 'message': 'REST API JSON documentation found at http://127.0.0.1:8000/', 'response': '{...}'}
     """
     _errors = set()
@@ -297,7 +297,7 @@ async def analyze_api_maturity(uri: str) -> dict:
     """
     feedbacks = {}
 
-    swagger_doc = await check_swagger_rest(uri)
+    swagger_doc = await check_documentation_json(uri)
 
     if swagger_doc['status'] == 'error':
         return swagger_doc
