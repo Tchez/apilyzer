@@ -56,7 +56,9 @@ def test_is_json_rest_api_no_json():
 
 def test_check_documentation_json_success_doc():
     result = asyncio.run(
-        check_documentation_json('https://petstore.swagger.io/v2', 'swagger.json')
+        check_documentation_json(
+            'https://petstore.swagger.io/v2', 'swagger.json'
+        )
     )
     assert result['status'] == 'success'
     assert (
