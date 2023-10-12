@@ -17,15 +17,12 @@ async def _is_json_rest_api(uri: str) -> (bool, httpx.Response):
         bool: True if the API is JSON REST, False otherwise.
         httpx.Response: The response of the GET request.
 
-    Raises:
-        httpx.HTTPError: If there was an error making the request (handled within the function).
-
     Examples:
         >>> import asyncio
         >>> asyncio.run(_is_json_rest_api('http://127.0.0.1:8000')) # doctest: +SKIP
         True, <Response [200 OK]>
     """
-    if not (uri.startswith('http') or uri.startswith('https')):
+    if not (uri.startswith('http')):
         return False, None
 
     try:
@@ -40,19 +37,19 @@ async def _is_json_rest_api(uri: str) -> (bool, httpx.Response):
     if response.status_code // 100 != 2:
         return False, response
 
+    allow_header = response.headers.get('access-control-allow-methods', '')
+    if any(
+        verb in allow_header
+        for verb in ['GET', 'POST', 'PUT', 'PATCH', 'DELETE']
+    ):
+        return True, response
+
     content_type = response.headers.get('Content-Type', '')
 
     if 'application/json' in content_type:
         data = response.json()
         if isinstance(data, (list, dict)):
             return True, response
-
-    allow_header = response.headers.get('Allow', '')
-    if any(
-        verb in allow_header
-        for verb in ['GET', 'POST', 'PUT', 'PATCH', 'DELETE']
-    ):
-        return True, response
 
     return False, response
 
@@ -104,19 +101,24 @@ async def check_documentation_json(uri: str, doc_endpoint: str = None) -> dict:
         try:
             is_rest, response = await _is_json_rest_api(full_url)
 
-            if not is_rest:
+            if not is_rest and doc_endpoint:
                 _errors.add(
                     f'The URL {full_url} does not seem to be a JSON REST API'
                 )
-                continue
 
-            if response.status_code // 100 != 2:
+            if not response and not doc_endpoint:
+                _errors.add(
+                    f'The base URL provided ({uri}) does not seem to be a JSON REST API. Try specifying the documentation endpoint'
+                )
+
+            if response and response.status_code // 100 != 2 and doc_endpoint:
                 _errors.add(
                     f'{response.status_code} Client Error: {response.reason_phrase} for url: {response.url}'
                 )
-                continue
 
-            if any(term in response.text.lower() for term in api_terms):
+            if response and any(
+                term in response.text.lower() for term in api_terms
+            ):
                 if 'application/json' in response.headers.get(
                     'Content-Type', ''
                 ):
@@ -125,18 +127,25 @@ async def check_documentation_json(uri: str, doc_endpoint: str = None) -> dict:
                         'message': f'REST API JSON documentation found at {full_url}',
                         'response': response.json(),
                     }
-                else:
+                elif response.status_code // 100 == 2:
                     message = f'Potential REST API documentation found at {full_url}, but not in JSON format'
                     if not doc_endpoint:
                         message += ' (Endpoint not specified, please provide the JSON documentation endpoint)'
                     return {
                         'status': 'warning',
                         'message': message,
-                        'response': None,
+                        'response': response.text,
                     }
 
         except Exception as e:
-            _errors.add(f'An error occurred while requesting {full_url}: {e}')
+            if doc_endpoint:
+                _errors.add(
+                    f'An error occurred while requesting {full_url}: {e}'
+                )
+            else:
+                _errors.add(
+                    f'An error occurred while requesting {uri}: Endpoint not specified, and we could not identify it with the base URL alone. Please provide the JSON documentation endpoint'
+                )
 
     message = 'No REST API documentation found'
 
