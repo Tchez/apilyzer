@@ -224,89 +224,87 @@ async def _verify_maturity_paths(paths: dict) -> dict:
     feedback = {}
     messages = []
     _has_only_post_method = True
-    valid_methods = ['get', 'post', 'put', 'patch', 'delete']
+    expected_responses = {
+        'get': {
+            '200': 'OK',
+        },
+        'post': {
+            '201': 'Created',
+        },
+        'put': {
+            '200': 'OK',
+        },
+        'patch': {
+            '200': 'OK',
+        },
+        'delete': {
+            '200': 'OK',
+        },
+    }
+    valid_methods = set(expected_responses.keys())
 
     for path, path_info in paths.items():
-        for method in path_info.keys():
+        for method, method_info in path_info.items():
             if method not in valid_methods:
                 messages.append(
-                    f'🚫   Error! The {path} method uses a non-conventional {method.upper()} method. '
-                    f'Consider following the standard RESTful methods for better maturity'
+                    f'🚫   Alert! The {path} path uses a non-conventional {method.upper()} method.'
+                    f' Consider following the standard RESTful methods for better maturity.'
                 )
+                continue
 
-        if 'get' in path_info:
-            _has_only_post_method = False
+            if method != 'post':
+                _has_only_post_method = False
 
-        for method, expected_status, expected_description in [
-            ('post', '201', 'Created'),
-            ('put', '200', 'OK'),
-            ('patch', '200', 'OK'),
-            ('delete', '200', 'OK'),
-        ]:
-            if method in path_info:
-                _has_only_post_method = (
-                    False if method != 'post' else _has_only_post_method
+            responses = method_info.get('responses', {})
+            for status, expected_description in expected_responses.get(
+                method, {}
+            ).items():
+                actual_description = responses.get(status, {}).get(
+                    'description'
                 )
-
-                actual_status = next(
-                    iter(path_info[method].get('responses', {}).keys()), None
-                )
-                actual_description = (
-                    path_info[method]
-                    .get('responses', {})
-                    .get(expected_status, {})
-                    .get('description', '')
-                )
-
-                if actual_status == expected_status:
-                    if actual_description != expected_description:
+                if status in responses:
+                    if actual_description == expected_description:
+                        messages.append(
+                            f'✅   Congratulations! The {path} path for {method.upper()} requests returns the correct status code ({status}) and description'
+                        )
+                    else:
                         messages.append(
                             f'✅   Congratulations! The {path} method returns the correct status code for {method.upper()} requests'
                         )
                         messages.append(
-                            f'⚠️   Warning! Richardson\'s maturity model recommends using "{expected_description}" as the description for {method.upper()} requests'
-                        )
-                    else:
-                        messages.append(
-                            f'✅   Congratulations! The {path} method returns the correct status code and description for {method.upper()} requests. '
-                            f"It aligns with Richardson's maturity model."
+                            f'⚠️   Warning! The {path} path for {method.upper()} requests should return the description "{expected_description}" for the {status} status code, but it returns "{actual_description}" instead'
                         )
                 else:
-                    if actual_description:
-                        messages.append(
-                            f'🚫   Error! The {path} method returns the wrong status code for {method.upper()} requests. '
-                            f'Expected: {expected_status} but got: {actual_status}. '
-                            f"It is at level 0 of Richardson's maturity model."
-                        )
-                    else:
-                        messages.append(
-                            f'🚫   Error! The {path} method does not provide any response status or description for {method.upper()} requests. '
-                            f"It is at level 0 of Richardson's maturity model."
-                        )
+                    messages.append(
+                        f'🚫   Error! The {path} path for {method.upper()} requests is missing the expected {status} status code'
+                    )
 
     if _has_only_post_method:
-        message = "🚫   Error! The API only has POST methods. It is at level 0 of Richardson's maturity model."
+        messages.append(
+            "🚫   Error! The API only has POST methods. It is at level 0 of Richardson's maturity model"
+        )
     else:
-        message = "✅   Congratulations! The API has methods other than POST. It is at least at level 1 of Richardson's maturity model."
-
-    messages.append(message)
+        messages.append(
+            "✅   Congratulations! The API has methods other than POST. It is at least at level 1 of Richardson's maturity model"
+        )
 
     feedback['messages'] = messages
     return feedback
 
 
-async def analyze_api_maturity(uri: str) -> dict:
+async def analyze_api_maturity(uri: str, doc_endpoint: str = None) -> dict:
     """Analyze the maturity level of a REST API using Richardson's maturity model.
 
     Parameters:
         uri (str): The base URI of the API.
+        doc_endpoint (str, optional): The endpoint where the documentation is available. Defaults to None.
 
     Returns:
         dict: A dictionary containing feedback on the API's maturity level according to Richardson's maturity model.
     """
     feedbacks = {}
 
-    swagger_doc = await check_documentation_json(uri)
+    swagger_doc = await check_documentation_json(uri, doc_endpoint)
 
     if swagger_doc['status'] == 'error':
         return swagger_doc
