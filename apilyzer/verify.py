@@ -180,7 +180,7 @@ async def _supports_https(uri: str) -> dict:
         else uri
     )
 
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=10) as client:
         _errors = set()
         try:
             response = await client.get(https_uri)
@@ -381,7 +381,7 @@ async def estimate_rate_limit(uri: str, max_requests: int):
                 'response_code': None,
             }
 
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=10) as client:
         tasks = []
         for _ in range(max_requests):
             tasks.append(make_request(client, uri))
