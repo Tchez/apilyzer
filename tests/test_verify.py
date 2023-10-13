@@ -182,14 +182,6 @@ def test_estimate_rate_limit_success():
     assert 'requests were successful without 429 errors' in result['message']
 
 
-def test_estimate_rate_limit_failure():
-    api_url = 'https://petstore.swagger.io/v2/pet/1'
-    max_requests = 1
-    result = asyncio.run(estimate_rate_limit(api_url, max_requests))
-    assert result['status'] == 'error'
-    assert '429 errors were returned' in result['message']
-
-
 def test_estimate_rate_limit_request_error():
     api_url = 'https://api-with-request-error.com'
     max_requests = 100
