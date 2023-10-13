@@ -4,7 +4,7 @@ from apilyzer.verify import (
     _is_json_rest_api,
     _supports_https,
     analyze_api_maturity,
-    check_swagger_rest,
+    check_documentation_json,
     estimate_rate_limit,
 )
 
@@ -54,9 +54,11 @@ def test_is_json_rest_api_no_json():
     assert 'text/xml' in response.headers['content-type']
 
 
-def test_check_swagger_rest_success_doc():
+def test_check_documentation_json_success_doc():
     result = asyncio.run(
-        check_swagger_rest('https://petstore.swagger.io/v2', 'swagger.json')
+        check_documentation_json(
+            'https://petstore.swagger.io/v2', 'swagger.json'
+        )
     )
     assert result['status'] == 'success'
     assert (
@@ -66,8 +68,32 @@ def test_check_swagger_rest_success_doc():
     assert 'swagger' in result['response'] or 'openapi' in result['response']
 
 
-def test_check_swagger_rest_no_doc():
-    result = asyncio.run(check_swagger_rest('https://google.com'))
+def test_check_documentation_json_success_no_doc():
+    result = asyncio.run(
+        check_documentation_json('https://petstore.swagger.io/v2')
+    )
+    assert result['status'] == 'success'
+    assert (
+        'REST API JSON documentation found at https://petstore.swagger.io/v2/swagger.json'
+        in result['message']
+    )
+    assert 'swagger' in result['response'] or 'openapi' in result['response']
+
+
+def test_check_documentation_json_no_api_doc():
+    result = asyncio.run(
+        check_documentation_json('https://google.com', 'swagger.json')
+    )
+    assert result['status'] == 'error'
+    assert 'No REST API documentation found' in result['message']
+    assert (
+        'The URL https://google.com/swagger.json does not seem to be a JSON REST API'
+        in result['response']
+    )
+
+
+def test_check_documentation_json_no_api_no_doc():
+    result = asyncio.run(check_documentation_json('https://google.com'))
     assert result['status'] == 'error'
     assert 'No REST API documentation found' in result['message']
     assert (
@@ -76,13 +102,46 @@ def test_check_swagger_rest_no_doc():
     )
 
 
-def test_check_swagger_rest_invalid_url():
+def test_check_documentation_json_invalid_url_doc():
     invalid_url = 'https://invalid_url.com'
-    result = asyncio.run(check_swagger_rest(invalid_url))
+    result = asyncio.run(check_documentation_json(invalid_url))
     assert result['status'] == 'error'
     assert 'No REST API documentation found' in result['message']
     assert (
         '(Endpoint not specified, and we could not identify it with the base URL alone)'
+        in result['message']
+    )
+    assert (
+        'The base URL provided (https://invalid_url.com) does not seem to be a JSON REST API. Try specifying the documentation endpoint'
+        in result['response']
+    )
+
+
+def test_check_documentation_json_invalid_url_no_doc():
+    invalid_url = 'invalid_url.com'
+    result = asyncio.run(check_documentation_json(invalid_url, 'swagger.json'))
+    assert result['status'] == 'error'
+    assert 'No REST API documentation found' in result['message']
+    assert (
+        '(Endpoint not specified, and we could not identify it with the base URL alone)'
+        not in result['message']
+    )
+    assert (
+        f'The URL {invalid_url}/swagger.json does not seem to be a JSON REST API'
+        in result['response']
+    )
+
+
+def test_check_documentation_json_potential_doc_but_no_json_no_doc():
+    uri = 'https://developer.twitter.com/en/docs/twitter-api/'
+    result = asyncio.run(check_documentation_json(uri))
+    assert result['status'] == 'warning'
+    assert (
+        f'Potential REST API documentation found at {uri}, but not in JSON format'
+        in result['message']
+    )
+    assert (
+        '(Endpoint not specified, please provide the JSON documentation endpoint)'
         in result['message']
     )
 

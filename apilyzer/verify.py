@@ -17,15 +17,12 @@ async def _is_json_rest_api(uri: str) -> (bool, httpx.Response):
         bool: True if the API is JSON REST, False otherwise.
         httpx.Response: The response of the GET request.
 
-    Raises:
-        httpx.HTTPError: If there was an error making the request (handled within the function).
-
     Examples:
         >>> import asyncio
         >>> asyncio.run(_is_json_rest_api('http://127.0.0.1:8000')) # doctest: +SKIP
         True, <Response [200 OK]>
     """
-    if not (uri.startswith('http') or uri.startswith('https')):
+    if not (uri.startswith('http')):
         return False, None
 
     try:
@@ -40,6 +37,13 @@ async def _is_json_rest_api(uri: str) -> (bool, httpx.Response):
     if response.status_code // 100 != 2:
         return False, response
 
+    allow_header = response.headers.get('access-control-allow-methods', '')
+    if any(
+        verb in allow_header
+        for verb in ['GET', 'POST', 'PUT', 'PATCH', 'DELETE']
+    ):
+        return True, response
+
     content_type = response.headers.get('Content-Type', '')
 
     if 'application/json' in content_type:
@@ -47,18 +51,11 @@ async def _is_json_rest_api(uri: str) -> (bool, httpx.Response):
         if isinstance(data, (list, dict)):
             return True, response
 
-    allow_header = response.headers.get('Allow', '')
-    if any(
-        verb in allow_header
-        for verb in ['GET', 'POST', 'PUT', 'PATCH', 'DELETE']
-    ):
-        return True, response
-
     return False, response
 
 
-async def check_swagger_rest(uri: str, doc_endpoint: str = None) -> dict:
-    """Check if the given base URI of an API has REST API documentation available.
+async def check_documentation_json(uri: str, doc_endpoint: str = None) -> dict:
+    """Check if the given base URI of an API has REST API documentation available. If the documentation endpoint is not specified, the function will try to identify it.
 
     Parameters:
         uri (str): The base URI of the API.
@@ -69,7 +66,7 @@ async def check_swagger_rest(uri: str, doc_endpoint: str = None) -> dict:
 
     Examples:
         >>> import asyncio
-        >>> asyncio.run(check_swagger_rest('http://127.0.0.1:8000')) # doctest: +SKIP
+        >>> asyncio.run(check_documentation_json('http://127.0.0.1:8000')) # doctest: +SKIP
         {'status': 'success', 'message': 'REST API JSON documentation found at http://127.0.0.1:8000/', 'response': '{...}'}
     """
     _errors = set()
@@ -104,19 +101,24 @@ async def check_swagger_rest(uri: str, doc_endpoint: str = None) -> dict:
         try:
             is_rest, response = await _is_json_rest_api(full_url)
 
-            if not is_rest:
+            if not is_rest and doc_endpoint:
                 _errors.add(
                     f'The URL {full_url} does not seem to be a JSON REST API'
                 )
-                continue
 
-            if response.status_code // 100 != 2:
+            if not response and not doc_endpoint:
+                _errors.add(
+                    f'The base URL provided ({uri}) does not seem to be a JSON REST API. Try specifying the documentation endpoint'
+                )
+
+            if response and response.status_code // 100 != 2 and doc_endpoint:
                 _errors.add(
                     f'{response.status_code} Client Error: {response.reason_phrase} for url: {response.url}'
                 )
-                continue
 
-            if any(term in response.text.lower() for term in api_terms):
+            if response and any(
+                term in response.text.lower() for term in api_terms
+            ):
                 if 'application/json' in response.headers.get(
                     'Content-Type', ''
                 ):
@@ -125,18 +127,25 @@ async def check_swagger_rest(uri: str, doc_endpoint: str = None) -> dict:
                         'message': f'REST API JSON documentation found at {full_url}',
                         'response': response.json(),
                     }
-                else:
+                elif response.status_code // 100 == 2:
                     message = f'Potential REST API documentation found at {full_url}, but not in JSON format'
                     if not doc_endpoint:
                         message += ' (Endpoint not specified, please provide the JSON documentation endpoint)'
                     return {
                         'status': 'warning',
                         'message': message,
-                        'response': None,
+                        'response': response.text,
                     }
 
         except Exception as e:
-            _errors.add(f'An error occurred while requesting {full_url}: {e}')
+            if doc_endpoint:
+                _errors.add(
+                    f'An error occurred while requesting {full_url}: {e}'
+                )
+            else:
+                _errors.add(
+                    f'An error occurred while requesting {uri}: Endpoint not specified, and we could not identify it with the base URL alone. Please provide the JSON documentation endpoint'
+                )
 
     message = 'No REST API documentation found'
 
@@ -171,7 +180,7 @@ async def _supports_https(uri: str) -> dict:
         else uri
     )
 
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=10) as client:
         _errors = set()
         try:
             response = await client.get(https_uri)
@@ -215,89 +224,87 @@ async def _verify_maturity_paths(paths: dict) -> dict:
     feedback = {}
     messages = []
     _has_only_post_method = True
-    valid_methods = ['get', 'post', 'put', 'patch', 'delete']
+    expected_responses = {
+        'get': {
+            '200': 'OK',
+        },
+        'post': {
+            '201': 'Created',
+        },
+        'put': {
+            '200': 'OK',
+        },
+        'patch': {
+            '200': 'OK',
+        },
+        'delete': {
+            '200': 'OK',
+        },
+    }
+    valid_methods = set(expected_responses.keys())
 
     for path, path_info in paths.items():
-        for method in path_info.keys():
+        for method, method_info in path_info.items():
             if method not in valid_methods:
                 messages.append(
-                    f'🚫   Error! The {path} method uses a non-conventional {method.upper()} method. '
-                    f'Consider following the standard RESTful methods for better maturity'
+                    f'🚫   Alert! The {path} path uses a non-conventional {method.upper()} method.'
+                    f' Consider following the standard RESTful methods for better maturity.'
                 )
+                continue
 
-        if 'get' in path_info:
-            _has_only_post_method = False
+            if method != 'post':
+                _has_only_post_method = False
 
-        for method, expected_status, expected_description in [
-            ('post', '201', 'Created'),
-            ('put', '200', 'OK'),
-            ('patch', '200', 'OK'),
-            ('delete', '200', 'OK'),
-        ]:
-            if method in path_info:
-                _has_only_post_method = (
-                    False if method != 'post' else _has_only_post_method
+            responses = method_info.get('responses', {})
+            for status, expected_description in expected_responses.get(
+                method, {}
+            ).items():
+                actual_description = responses.get(status, {}).get(
+                    'description'
                 )
-
-                actual_status = next(
-                    iter(path_info[method].get('responses', {}).keys()), None
-                )
-                actual_description = (
-                    path_info[method]
-                    .get('responses', {})
-                    .get(expected_status, {})
-                    .get('description', '')
-                )
-
-                if actual_status == expected_status:
-                    if actual_description != expected_description:
+                if status in responses:
+                    if actual_description == expected_description:
+                        messages.append(
+                            f'✅   Congratulations! The {path} path for {method.upper()} requests returns the correct status code ({status}) and description'
+                        )
+                    else:
                         messages.append(
                             f'✅   Congratulations! The {path} method returns the correct status code for {method.upper()} requests'
                         )
                         messages.append(
-                            f'⚠️   Warning! Richardson\'s maturity model recommends using "{expected_description}" as the description for {method.upper()} requests'
-                        )
-                    else:
-                        messages.append(
-                            f'✅   Congratulations! The {path} method returns the correct status code and description for {method.upper()} requests. '
-                            f"It aligns with Richardson's maturity model."
+                            f'⚠️   Warning! The {path} path for {method.upper()} requests should return the description "{expected_description}" for the {status} status code, but it returns "{actual_description}" instead'
                         )
                 else:
-                    if actual_description:
-                        messages.append(
-                            f'🚫   Error! The {path} method returns the wrong status code for {method.upper()} requests. '
-                            f'Expected: {expected_status} but got: {actual_status}. '
-                            f"It is at level 0 of Richardson's maturity model."
-                        )
-                    else:
-                        messages.append(
-                            f'🚫   Error! The {path} method does not provide any response status or description for {method.upper()} requests. '
-                            f"It is at level 0 of Richardson's maturity model."
-                        )
+                    messages.append(
+                        f'🚫   Error! The {path} path for {method.upper()} requests is missing the expected {status} status code'
+                    )
 
     if _has_only_post_method:
-        message = "🚫   Error! The API only has POST methods. It is at level 0 of Richardson's maturity model."
+        messages.append(
+            "🚫   Error! The API only has POST methods. It is at level 0 of Richardson's maturity model"
+        )
     else:
-        message = "✅   Congratulations! The API has methods other than POST. It is at least at level 1 of Richardson's maturity model."
-
-    messages.append(message)
+        messages.append(
+            "✅   Congratulations! The API has methods other than POST. It is at least at level 1 of Richardson's maturity model"
+        )
 
     feedback['messages'] = messages
     return feedback
 
 
-async def analyze_api_maturity(uri: str) -> dict:
+async def analyze_api_maturity(uri: str, doc_endpoint: str = None) -> dict:
     """Analyze the maturity level of a REST API using Richardson's maturity model.
 
     Parameters:
         uri (str): The base URI of the API.
+        doc_endpoint (str, optional): The endpoint where the documentation is available. Defaults to None.
 
     Returns:
         dict: A dictionary containing feedback on the API's maturity level according to Richardson's maturity model.
     """
     feedbacks = {}
 
-    swagger_doc = await check_swagger_rest(uri)
+    swagger_doc = await check_documentation_json(uri, doc_endpoint)
 
     if swagger_doc['status'] == 'error':
         return swagger_doc
@@ -374,7 +381,7 @@ async def estimate_rate_limit(uri: str, max_requests: int):
                 'response_code': None,
             }
 
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=10) as client:
         tasks = []
         for _ in range(max_requests):
             tasks.append(make_request(client, uri))
