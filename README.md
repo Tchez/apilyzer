@@ -1,9 +1,9 @@
 > English documentation version in progress...
 
-<h1 align="center"> APIlyzer </h1>
+<img src="https://apilyzer.readthedocs.io/en/latest/assets/logo.png" width="400" style="display: block; margin: 20px auto;">
 
-<img src="https://apilyzer.readthedocs.io/en/latest/assets/temp_logo.jpg" width="400" style="display: block; margin: 20px auto;">
 
+# APIlyzer
 
 
 [![Documentation Status](https://readthedocs.org/projects/apilyzer/badge/?version=latest)](https://apilyzer.readthedocs.io/en/latest/?badge=latest)

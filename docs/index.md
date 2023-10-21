@@ -1,4 +1,4 @@
-![logo temporária](assets/temp_logo.jpg){ width="300" .center }
+![logo do APILIZER](assets/logo.png){ width="300" .center }
 # Analisador de API
 > Documentação em construção
 
