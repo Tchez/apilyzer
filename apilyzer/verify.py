@@ -344,7 +344,7 @@ async def analyze_api_maturity(uri: str, doc_endpoint: str = None) -> dict:
     return feedbacks
 
 
-async def estimate_rate_limit(uri: str, max_requests: int):
+async def estimate_rate_limit(uri: str, max_requests: int) -> dict:
     """Analyze the rate limit of a REST API using multiple requests in parallel.
 
     Parameters:
@@ -357,7 +357,7 @@ async def estimate_rate_limit(uri: str, max_requests: int):
     Examples:
         >>> import asyncio
         >>> asyncio.run(estimate_rate_limit('http://127.0.0.1:8000', 100)) # doctest: +SKIP
-        {'status': 'success', 'message': 'The API returned a 429 error (too many requests). This indicates that the rate limit has been exceeded', 'response': '{...}'}
+        {'status': 'success', 'message': 'The API returned a 429 error (too many requests). This indicates that the rate limit has been exceeded'}
     """
 
     async def make_request(session, uri):
@@ -367,18 +367,15 @@ async def estimate_rate_limit(uri: str, max_requests: int):
                 return {
                     'status': 'error',
                     'message': f'The API returned a 429 error (too many requests). This indicates that the rate limit has been exceeded',
-                    'response_code': response.status_code,
                 }
             return {
                 'status': 'success',
                 'message': 'All requests were successful',
-                'response_code': response.status_code,
             }
         except httpx.RequestError as exc:
             return {
                 'status': 'error',
                 'message': f'An error occurred while requesting {uri}: {exc}',
-                'response_code': None,
             }
 
     async with httpx.AsyncClient(timeout=10) as client:
@@ -394,5 +391,4 @@ async def estimate_rate_limit(uri: str, max_requests: int):
     return {
         'status': 'success',
         'message': f'All of {max_requests} requests were successful without 429 errors. This suggests that the API can support the specified number of requests',
-        'response_code': None,
     }
