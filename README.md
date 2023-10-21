@@ -8,7 +8,8 @@
 [![CI](https://github.com/tchez/apilyzer/actions/workflows/pipeline.yaml/badge.svg)](https://github.com/tchez/apilyzer/actions/workflows/pipeline.yaml)
 [![codecov](https://codecov.io/gh/tchez/apilyzer/branch/main/graph/badge.svg?token=OVQQF4IQY2)](https://codecov.io/gh/tchez/apilyzer)
 [![PyPI version](https://badge.fury.io/py/apilyzer.svg)](https://badge.fury.io/py/apilyzer)
-[![pt_br doc](https://img.shields.io/badge/pt_br-doc-00a3cc.svg)](README_PT.md)
+[![pt_br doc](https://img.shields.io/badge/pt_br-doc-00a3cc.svg)](https://github.com/Tchez/apilyzer/blob/main/README_PT.md)
+
 
 ## Table of Contents:
 
