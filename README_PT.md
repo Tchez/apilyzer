@@ -8,75 +8,74 @@
 [![CI](https://github.com/tchez/apilyzer/actions/workflows/pipeline.yaml/badge.svg)](https://github.com/tchez/apilyzer/actions/workflows/pipeline.yaml)
 [![codecov](https://codecov.io/gh/tchez/apilyzer/branch/main/graph/badge.svg?token=OVQQF4IQY2)](https://codecov.io/gh/tchez/apilyzer)
 [![PyPI version](https://badge.fury.io/py/apilyzer.svg)](https://badge.fury.io/py/apilyzer)
-[![pt_br doc](https://img.shields.io/badge/pt_br-doc-00a3cc.svg)](README_PT.md)
 
-## Table of Contents:
+## Tabela de conteúdos:
 
-- [Description and context](#description-and-context)
-- [Documentation](#documentation)
-- [Prerequisites](#prerequisites)
-- [Installation Guide](#installation-guide)
-- [How to use?](#how-to-use)
-- [Dependencies](#dependencies)
-- [How to contribute](#how-to-contribute)
-- [Team](#team)
-- [License](#license)
-
-
-## Description and context
-
-APIlyzer is a Python library aimed at analyzing the maturity level of REST APIs, following the Richardson maturity model. The goal of this library is to evaluate APIs and generate a report on their maturity level, along with recommendations for improvements so that the API reaches the desired maturity level.
-> Note: The library is still in development, so it does not have all the features we want to implement.
+- [Descrição e contexto](#descrição-e-contexto)
+- [Documentação](#documentação)
+- [Pré-requisitos](#pré-requisitos)
+- [Guia de instalação](#guia-de-instalação)
+- [Como usar?](#como-usar)
+- [Dependências](#dependências)
+- [Como contribuir](#como-contribuir)
+- [Equipe](#equipe)
+- [Licença](#licença)
 
 
-## Documentation
+## Descrição e contexto
 
-The complete documentation, containing all the details of the project, can be accessed at:
+APIlyzer é uma biblioteca Python destinada a analisar o nível de maturidade de APIs REST, seguindo o modelo de maturidade de Richardson. O objetivo desta biblioteca é avaliar APIs e gerar um relatório sobre o seu nível de maturidade, juntamente com recomendações de melhorias para que a API atinja o nível de maturidade desejado.
+> Observação: A biblioteca ainda está em desenvolvimento, portanto, não possui todas as funcionalidades que queremos implementar.
+
+
+## Documentação
+
+A documentação completa, contendo todos os detalhes do projeto, pode ser acessada em:
 [https://apilyzer.readthedocs.io/en/latest/](https://apilyzer.readthedocs.io/en/latest/)
 
-## Prerequisites
+## Pré-requisitos
 
-Make sure you have Python 3.9 or higher installed on your system before proceeding with the installation.
+Certifique-se de ter o Python 3.9 ou superior instalado em seu sistema antes de prosseguir com a instalação.
 
 
-## Installation Guide
+## Guia de instalação
 
-We recommend creating a virtual environment to install the library in an isolated manner. Follow the commands below for installation:
+Recomendamos a criação de um ambiente virtual para instalar a biblioteca de forma isolada. Siga os comandos abaixo para instalação:
 
 
 ```bash
-# Create virtual environment
+# Criar ambiente virtual
 python -m venv .venv
 ```	
 
 ```bash
-# Activate virtual environment
+# Ativar ambiente virtual
 source .venv/bin/activate # Linux
 .venv\Scripts\activate # Windows
 ```
 
 ```bash
-# Install the library
+# Instalar a biblioteca
 pip install apilyzer
 ```
 
-## How to use?
+## Como usar?
 
-APIlyzer offers a command line interface (CLI) for analyzing REST APIs. To know the available commands, run:
+APIlyzer oferece uma interface de linha de comando (CLI) para análise de APIs REST. Para conhecer os comandos disponíveis, execute:
 
 ```bash
 apilyzer
 ```
 
-Currently, there are 3 subcommands available for this application:
+Atualmente, existem 3 subcomandos disponíveis para esta aplicação:
 
-- `verify-rest`: Checks if a REST API is documented based on the provided URL and if it is, returns the API response.
+- `verify-rest`: Verifica se uma API REST está documentada com base na URL fornecida e caso esteja, retorna o retorno da API.
 
-- `verify-maturity`: Analyzes the maturity level of a REST API based on the Richardson maturity model.
+- `verify-maturity`: Analisa o nível de maturidade de uma API REST com base no modelo de maturidade de Richardson.
 
-- `test-rate`: Performs a number of requests (100 by default) to the API with the aim of validating whether the API has a limit for the number of requests.
+- `test-rate`: Efetua uma quantidade de requisições (100 por padrão) para a API com o objetivo de validar se a API tem um limite para a quantidade de requisições.
 
-Examples of use:
+Exemplos de uso:
 
 ```bash
 apilyzer verify-rest https://petstore.swagger.io -e v2/swagger
@@ -88,58 +87,58 @@ apilyzer verify-maturity https://picpay.github.io/picpay-docs-digital-payments/s
 apilyzer test-rate https://petstore.swagger.io/v2/pet
 ```
 
-## More information about the CLI
+## Mais informações sobre o CLI
 
-For more information about the CLI, just run the command below:
+Para mais informações sobre o CLI, basta executar o comando abaixo:
 
 ```bash
 apilyzer --help
 ```
 
-For more information on CLI subcommands, just run the command below:
+Para mais informações sobre os subcomandos do CLI, basta executar o comando abaixo:
 
 ```bash
-apilyzer <subcommand> --help
+apilyzer <subcomando> --help
 ```
 
 
-## Dependencies
+## Dependências
 
-Main project dependencies:
+Principais dependências do projeto:
 
-    # Production
+    # Produção
     python = "^3.9"
     httpx = "^0.25.0"
     typer = "^0.9.0"
     rich = "^13.5.2"
 
-    # Development
+    # Desenvolvimento
     pytest = "^7.4.2"
     pytest-cov = "^4.1.0"
     blue = "^0.9.1"
     isort = "^5.12.0"
     taskipy = "^1.12.0"
 
-    # Documentation
+    # Documentação
     mkdocs-material = "^9.3.1"
     mkdocstrings = "^0.23.0"
     mkdocstrings-python = "^1.7.0"
 
 
-## How to contribute
+## Como contribuir
 
-There are several ways to contribute to the project, be it with code, tests, documentation, among others. See the project documentation in the [Documentation](#documentation) section to learn more about how to contribute to the project.
+Existem várias formas de contribuir com o projeto, seja com código, testes, documentação, entre outros. Consulte a documentação do projeto na seção [Documentação](#documentação) para saber mais sobre como contribuir para o projeto.
 
-## Team
+## Equipe
 
-### Author
+### Autor
 
 #### Marco Antônio Martins Porto Netto
 
 [![GitHub](https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Tchez/)
 [![LinkedIn](https://img.shields.io/badge/linkedin-%230077B5.svg?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/tchez/)
 
-### Developers
+### Desenvolvedores
 
 #### Yan Sardinha
 
@@ -147,7 +146,7 @@ There are several ways to contribute to the project, be it with code, tests, doc
 [![LinkedIn](https://img.shields.io/badge/linkedin-%230077B5.svg?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/yan-sardinha/)
 
 
-## License
+## Licença
 
 MIT License
 
