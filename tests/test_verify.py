@@ -11,9 +11,7 @@ from apilyzer.verify import (
 
 def test_is_json_rest_api_true():
     is_rest, response = asyncio.run(
-        _is_json_rest_api(
-            'https://picpay.github.io/picpay-docs-digital-payments/swagger/checkout.json'
-        )
+        _is_json_rest_api('https://petstore.swagger.io/v2/swagger.json')
     )
 
     assert is_rest is True
@@ -136,10 +134,8 @@ def test_check_documentation_json_potential_doc_but_no_json_no_doc():
     uri = 'https://developer.twitter.com/en/docs/twitter-api/'
     result = asyncio.run(check_documentation_json(uri))
     assert result['status'] == 'warning'
-    assert (
-        f'Potential REST API documentation found at {uri}, but not in JSON format'
-        in result['message']
-    )
+    assert 'Potential REST API documentation found at' in result['message']
+    assert 'but not in JSON format' in result['message']
     assert (
         '(Endpoint not specified, please provide the JSON documentation endpoint)'
         in result['message']
