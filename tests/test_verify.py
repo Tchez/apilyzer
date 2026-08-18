@@ -86,7 +86,6 @@ def test_is_json_rest_api_json_response(monkeypatch):
     assert response is not None
 
 
-
 def test_check_documentation_json_success_doc():
     result = asyncio.run(
         check_documentation_json(
@@ -156,7 +155,9 @@ def test_check_documentation_json_no_response_from_base_url(monkeypatch):
 
     import apilyzer.verify as verify_module
 
-    monkeypatch.setattr(verify_module, '_is_json_rest_api', fake_is_json_rest_api)
+    monkeypatch.setattr(
+        verify_module, '_is_json_rest_api', fake_is_json_rest_api
+    )
 
     result = asyncio.run(check_documentation_json('https://example.com'))
 
@@ -177,12 +178,17 @@ def test_check_documentation_json_request_exception(monkeypatch):
 
     import apilyzer.verify as verify_module
 
-    monkeypatch.setattr(verify_module, '_is_json_rest_api', fake_is_json_rest_api)
+    monkeypatch.setattr(
+        verify_module, '_is_json_rest_api', fake_is_json_rest_api
+    )
 
     result = asyncio.run(check_documentation_json('https://example.com'))
 
     assert result['status'] == 'error'
-    assert any('An error occurred while requesting' in msg for msg in result['response'])
+    assert any(
+        'An error occurred while requesting' in msg
+        for msg in result['response']
+    )
 
 
 def test_check_documentation_json_json_payload_no_api_terms(monkeypatch):
@@ -209,7 +215,6 @@ def test_check_documentation_json_json_payload_no_api_terms(monkeypatch):
 
         async def get(self, uri, *args, **kwargs):
             return FakeResponse()
-
 
     import apilyzer.verify as verify_module
 
@@ -274,7 +279,9 @@ def test_analyze_api_maturity_invalid_json(monkeypatch):
         fake_check_documentation_json,
     )
 
-    result = asyncio.run(analyze_api_maturity('https://example.com/swagger.json'))
+    result = asyncio.run(
+        analyze_api_maturity('https://example.com/swagger.json')
+    )
 
     assert result['status'] == 'error'
     assert 'not valid JSON' in result['message']
@@ -292,7 +299,9 @@ def test_analyze_api_maturity_response_list(monkeypatch):
         fake_check_documentation_json,
     )
 
-    result = asyncio.run(analyze_api_maturity('https://example.com/swagger.json'))
+    result = asyncio.run(
+        analyze_api_maturity('https://example.com/swagger.json')
+    )
 
     assert result['status'] == 'error'
     assert 'no paths were found' in result['message']
@@ -326,10 +335,15 @@ def test_analyze_api_maturity_with_mocked_https_check(monkeypatch):
     )
     monkeypatch.setattr(verify_module, '_supports_https', fake_supports_https)
 
-    result = asyncio.run(analyze_api_maturity('https://example.com/swagger.json'))
+    result = asyncio.run(
+        analyze_api_maturity('https://example.com/swagger.json')
+    )
 
     assert result['status'] == 'success'
-    assert result['https'] == '🚫 The URI does not support HTTPS at https://example.com'
+    assert (
+        result['https']
+        == '🚫 The URI does not support HTTPS at https://example.com'
+    )
     assert result['feedback']['messages'] is not None
 
 
@@ -363,7 +377,9 @@ def test_verify_maturity_paths_only_post_methods():
         )
     )
 
-    assert any('API only has POST methods' in msg for msg in result['messages'])
+    assert any(
+        'API only has POST methods' in msg for msg in result['messages']
+    )
 
 
 def test_verify_maturity_paths_missing_expected_response():
@@ -378,7 +394,8 @@ def test_verify_maturity_paths_missing_expected_response():
     )
 
     assert any(
-        'missing the expected 200 status code' in msg for msg in result['messages']
+        'missing the expected 200 status code' in msg
+        for msg in result['messages']
     )
 
 
@@ -422,7 +439,8 @@ def test_supports_https_request_error(monkeypatch):
     assert result['status'] == 'error'
     assert 'does not support HTTPS' in result['message']
     assert any(
-        'An error occurred while requesting' in msg for msg in result['response']
+        'An error occurred while requesting' in msg
+        for msg in result['response']
     )
 
 
@@ -469,13 +487,17 @@ def test_estimate_rate_limit_too_many_requests(monkeypatch):
     assert '429 error (too many requests)' in result['message']
 
 
-def test_check_documentation_json_request_exception_with_doc_endpoint(monkeypatch):
+def test_check_documentation_json_request_exception_with_doc_endpoint(
+    monkeypatch,
+):
     async def fake_is_json_rest_api(uri):
         raise RuntimeError('boom')
 
     import apilyzer.verify as verify_module
 
-    monkeypatch.setattr(verify_module, '_is_json_rest_api', fake_is_json_rest_api)
+    monkeypatch.setattr(
+        verify_module, '_is_json_rest_api', fake_is_json_rest_api
+    )
 
     result = asyncio.run(
         check_documentation_json('https://example.com', 'swagger.json')
