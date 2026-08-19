@@ -19,4 +19,4 @@ plugins:
 - mkdocstrings:
     handlers:
       python: 
-        paths: [apilyzer]
+        paths: [.]
