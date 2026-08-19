@@ -118,7 +118,7 @@ Main project dependencies:
     pytest = "^7.4.2"
     pytest-cov = "^4.1.0"
     blue = "^0.9.1"
-    isort = "^5.12.0"
+    isort = ">=5.12,<7.0"
     taskipy = "^1.12.0"
 
     # Documentation
