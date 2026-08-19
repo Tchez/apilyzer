@@ -123,8 +123,9 @@ Main project dependencies:
 
     # Documentation
     mkdocs-material = "^9.3.1"
-    mkdocstrings = "^0.23.0"
+    mkdocstrings = ">=0.23,<0.31"
     mkdocstrings-python = "^1.7.0"
+    pymdown-extensions = ">=10.21.2,<11.0"
 
 
 ## How to contribute
