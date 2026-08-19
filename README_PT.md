@@ -109,8 +109,8 @@ Principais dependências do projeto:
     # Produção
     python = "^3.9"
     httpx = "^0.25.0"
-    typer = "^0.9.0"
-    rich = "^13.5.2"
+    typer = ">=0.9,<0.24"
+    rich = ">=13.5.2,<16.0.0"
 
     # Desenvolvimento
     pytest = "^7.4.2"
