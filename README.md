@@ -37,7 +37,7 @@ The complete documentation, containing all the details of the project, can be ac
 
 ## Prerequisites
 
-Make sure you have Python 3.9 or higher installed on your system before proceeding with the installation.
+Make sure you have Python 3.10 or higher installed on your system before proceeding with the installation.
 
 
 ## Installation Guide
@@ -109,15 +109,15 @@ apilyzer <subcommand> --help
 Main project dependencies:
 
     # Production
-    python = "^3.9"
+    python = ">=3.10,<4.0"
     httpx = ">=0.25,<0.29"
     typer = ">=0.9,<0.24"
     rich = ">=13.5.2,<16.0.0"
 
     # Development
-    pytest = "^7.4.2"
+    pytest = ">=9.0.3,<10.0.0"
     pytest-cov = "^4.1.0"
-    blue = "^0.9.1"
+    black = ">=26.3.1,<27.0"
     isort = ">=5.12,<7.0"
     taskipy = "^1.12.0"
 
@@ -125,7 +125,7 @@ Main project dependencies:
     mkdocs-material = "^9.3.1"
     mkdocstrings = ">=0.23,<0.31"
     mkdocstrings-python = "^1.7.0"
-    pymdown-extensions = ">=10.21.2,<11.0"
+    pymdown-extensions = ">=11.0.1,<12.0"
 
 
 ## How to contribute
