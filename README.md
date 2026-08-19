@@ -110,7 +110,7 @@ Main project dependencies:
 
     # Production
     python = "^3.9"
-    httpx = "^0.25.0"
+    httpx = ">=0.25,<0.29"
     typer = ">=0.9,<0.24"
     rich = ">=13.5.2,<16.0.0"
 
