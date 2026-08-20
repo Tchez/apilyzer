@@ -49,3 +49,23 @@ jobs:
 
       - name: Audit locked dependencies
         run: pip-audit --requirement /tmp/apilyzer-requirements.txt --no-deps --disable-pip
+
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Copy files
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install poetry
+        run: pip install poetry
+
+      - name: Install documentation dependencies
+        run: poetry install --with doc --without dev
+
+      - name: Build documentation
+        run: poetry run mkdocs build --strict
