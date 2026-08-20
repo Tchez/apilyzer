@@ -3,6 +3,9 @@
 
 # APIlyzer
 
+> [!WARNING]
+> **Deprecated:** APIlyzer is no longer actively maintained. It was created as a study project and it is not part of the maintainer's current focus. No new features, fixes, or updates are planned for the time being.
+
 
 [![Documentation Status](https://readthedocs.org/projects/apilyzer/badge/?version=latest)](https://apilyzer.readthedocs.io/en/latest/?badge=latest)
 [![CI](https://github.com/tchez/apilyzer/actions/workflows/pipeline.yaml/badge.svg)](https://github.com/tchez/apilyzer/actions/workflows/pipeline.yaml)
@@ -13,6 +16,7 @@
 
 ## Table of Contents:
 
+- [Project status](#project-status)
 - [Description and context](#description-and-context)
 - [Documentation](#documentation)
 - [Prerequisites](#prerequisites)
@@ -24,10 +28,14 @@
 - [License](#license)
 
 
+## Project status
+
+This library is **deprecated** and is not under active development or maintenance. APIlyzer was a past study project and is no longer aligned with the maintainer's current areas of focus.
+
+
 ## Description and context
 
 APIlyzer is a Python library aimed at analyzing the maturity level of REST APIs, following the Richardson maturity model. The goal of this library is to evaluate APIs and generate a report on their maturity level, along with recommendations for improvements so that the API reaches the desired maturity level.
-> Note: The library is still in development, so it does not have all the features we want to implement.
 
 
 ## Documentation

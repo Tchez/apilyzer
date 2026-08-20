@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "apilyzer"
-version = "0.7.1"
-description = "APIlyzer is a python library that aims to analyze the level of maturity of REST APIs, following the Richardson maturity model"
+version = "0.7.2"
+description = "Deprecated, unfinished study project for analyzing REST API maturity"
 license = "MIT"
 authors = ["Marco Antônio <marcomartins06@rede.ulbra.br>"]
 readme = "README.md"
@@ -9,7 +9,7 @@ packages = [{ include = "apilyzer" }]
 classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Environment :: Console",
-    "Development Status :: 2 - Pre-Alpha",
+    "Development Status :: 7 - Inactive",
     "Programming Language :: Python :: 3.10",
     "Intended Audience :: Developers",
 ]
