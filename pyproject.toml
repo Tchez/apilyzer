@@ -27,7 +27,7 @@ apilyzer = "apilyzer.cli:app"
 [tool.poetry.dependencies]
 python = ">=3.10,<4.0"
 httpx = ">=0.25,<0.29"
-typer = ">=0.9,<0.24"
+typer = ">=0.27.1,<0.28"
 rich = ">=13.5.2,<16.0.0"
 
 
