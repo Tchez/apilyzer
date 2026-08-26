@@ -41,7 +41,7 @@ taskipy = "^1.12.0"
 
 [tool.poetry.group.doc.dependencies]
 mkdocs-material = "^9.3.1"
-mkdocstrings = ">=0.23,<0.31"
+mkdocstrings = ">=1.0.6,<1.1"
 mkdocstrings-python = "^1.7.0"
 pymdown-extensions = ">=11.0.1,<12.0"
 
